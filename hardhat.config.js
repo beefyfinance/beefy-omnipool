@@ -38,7 +38,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200_000_000
+            runs: 200
           },
         },
       }
@@ -47,8 +47,8 @@ module.exports = {
   etherscan: {
     apiKey: {
       mainnet: process.env.ETH_API_KEY,
-      arbitrumOne: process.env.ARBI_API_KEY,
-      optimism: process.env.OP_API_KEY,
+      arbitrumOne: process.env.ARBITRUM_API_KEY,
+      optimisticEthereum: process.env.OPTIMISM_API_KEY,
       polygon: process.env.POLYGON_API_KEY
     },
     customChains: [],

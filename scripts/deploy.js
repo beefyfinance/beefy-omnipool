@@ -7,19 +7,27 @@
 const hre = require("hardhat");
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
 
-  const lockedAmount = hre.ethers.utils.parseEther("1");
+  const bifi = "0x0000000000000000000000000000000000000000";
+  const xBIFI = "0x161A54739C7F4D601f3d6f7ed35A1387E9Eb857F";
+  const lockbox = "0x0000000000000000000000000000000000000000";
+  const endpoint = "0x3c2269811836af69497E5F486A85D7316753cf62";
+  const gasLimit = 2000000;
+  const Contract = await hre.ethers.getContractFactory("LayerZeroBridge");
+  const contract = await Contract.deploy(
+    bifi, 
+    xBIFI, 
+    lockbox, 
+    gasLimit,
+    endpoint
+  );
 
-  const Lock = await hre.ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+ // const contract = await Contract.deploy();
 
-  await lock.deployed();
+  await contract.deployed();
 
   console.log(
-    `Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
+    `Contract deployed to ${contract.address}`
   );
 }
 
