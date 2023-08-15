@@ -27,7 +27,6 @@ import {BalancerActionsLib} from "../utils/BalancerActionsLib.sol";
 import {IWrappedNative} from "../interfaces/IWrappedNative.sol";
 import {BeefyRevenueBridgeStructs} from "./BeefyRevenueBridgeStructs.sol";
 
-
 // Beefy's revenue bridging system
 contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     using SafeERC20 for IERC20;
@@ -175,7 +174,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
             ICircle(bridgeParams.bridge).depositForBurn(
                 bal,
                 destinationDomain,
-                keccak256(abi.encode(destinationAddress.destination)),
+                 bytes32(uint256(uint160(destinationAddress.destination))),
                 address(stable)
             );
         }
