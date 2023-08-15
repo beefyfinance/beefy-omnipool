@@ -50,7 +50,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
 
     uint256 public minBridgeAmount;
 
-    // Mapping our enums to function strings
+    // Mapping our enums to function string
     mapping(bytes32 => string) public bridgeToUse;
     mapping(bytes32 => string) public swapToUse;
 
@@ -105,7 +105,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     function _initSwapMapping() private {
         swapToUse[keccak256(abi.encode("UNISWAP_V2"))] = "swapUniV2()";
         swapToUse[keccak256(abi.encode("UNISWAP_V3"))] = "swapUniV3()";
-        swapToUse[keccak256(abi.encode("UNISWAP_V3_DEADLINE"))] = "SwapUniV3Deadline()";
+        swapToUse[keccak256(abi.encode("UNISWAP_V3_DEADLINE"))] = "swapUniV3Deadline()";
         swapToUse[keccak256(abi.encode("BALANCER"))] = "swapBalancer()";
     }
 
@@ -115,23 +115,15 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     }
 
     function _swap() private {
-        bytes memory result = address(this).functionCall(
-            abi.encodeWithSignature(
-                swapToUse[activeSwap]
-            )
+        address(this).functionCall(
+            abi.encodeWithSignature(swapToUse[activeSwap])
         );
-
-        if (result.length == 0) revert SwapError();
     }
 
     function _bridge() private {
-        bytes memory result = address(this).functionCall(
-            abi.encodeWithSignature(
-                bridgeToUse[activeBridge]
-            )
+        address(this).functionCall(
+            abi.encodeWithSignature(bridgeToUse[activeBridge])
         );
-
-        if (result.length == 0) revert BridgeError();
     }
 
     function setActiveBridge(bytes32 _bridgeHash, BridgeParams calldata _params) external onlyOwner {
@@ -152,7 +144,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         activeSwap = _swapHash;
         swapParams = _params;
 
-        _approveTokenIfNeeded(address(stable), _params.router);
+        _approveTokenIfNeeded(address(native), _params.router);
     }  
     
     function setMinBridgeAmount(uint256 _amount) external onlyOwner {
