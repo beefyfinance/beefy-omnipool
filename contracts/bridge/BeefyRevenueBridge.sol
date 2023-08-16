@@ -17,6 +17,7 @@ import {IzkSync} from "../interfaces/bridge/IzkSync.sol";
 
 //Swap interfaces and utils
 import {IUniswapRouterETH} from "../interfaces/swap/IUniswapRouterETH.sol";
+import {ISolidlyRouter} from "../interfaces/swap/ISolidlyRouter.sol";
 import {IBalancerVault} from "../interfaces/swap/IBalancerVault.sol";
 import {UniV3Actions} from "../utils/UniV3Actions.sol";
 import {Path} from '../utils/Path.sol';
@@ -103,6 +104,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
 
     function _initSwapMapping() private {
         swapToUse[keccak256(abi.encode("UNISWAP_V2"))] = "swapUniV2()";
+        swapToUse[keccak256(abi.encode("SOLIDLY"))] = "swapSolidly()";
         swapToUse[keccak256(abi.encode("UNISWAP_V3"))] = "swapUniV3()";
         swapToUse[keccak256(abi.encode("UNISWAP_V3_DEADLINE"))] = "swapUniV3Deadline()";
         swapToUse[keccak256(abi.encode("BALANCER"))] = "swapBalancer()";
@@ -164,7 +166,6 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     }
 
     /**@notice Bridge function called by this contract if it is the the activeBridge */
-
     function bridgeCircle() external onlyThis {
         uint32 destinationDomain = abi.decode(bridgeParams.params, (uint32));
         _swap();
@@ -245,7 +246,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
             ISynapse(bridgeParams.bridge).swapAndRedeem(
                 destinationAddress.destination,
                 params.chainId,
-                address(stable),
+                params.token,
                 params.tokenIndexFrom,
                 params.tokenIndexTo,
                 bal,
@@ -296,6 +297,16 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
             );
     }
 
+    function swapSolidly() external onlyThis {
+        ISolidlyRouter.Routes[] memory routes = abi.decode(swapParams.params, (ISolidlyRouter.Routes[]));
+        address[] memory route = _solidlyToRoute(routes);
+        if (route[0] != address(native)) revert IncorrectRoute();
+        if (route[route.length - 1] != address(stable)) revert IncorrectRoute();
+        
+        uint256 bal = _balanceOfNative();
+        ISolidlyRouter(swapParams.router).swapExactTokensForTokens(bal, 0, routes, address(this), block.timestamp);
+    }
+
     function swapUniV3() external onlyThis {
         bytes memory path = abi.decode(swapParams.params, (bytes));
         address[] memory route = _pathToRoute(path);
@@ -340,7 +351,6 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         return keccak256(abi.encode(_variable));
     }
 
-
     // Convert encoded path to token route
     function _pathToRoute(bytes memory _path) private pure returns (address[] memory) {
         uint256 numPools = _path.numPools();
@@ -350,6 +360,15 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
             route[i] = tokenA;
             route[i + 1] = tokenB;
             _path = _path.skipToken();
+        }
+        return route;
+    }
+
+    function _solidlyToRoute(ISolidlyRouter.Routes[] memory _route) private pure returns (address[] memory) {
+        address[] memory route = new address[](_route.length + 1);
+        route[0] = _route[0].from;
+        for (uint i; i < _route.length; ++i) {
+            route[i + 1] = _route[i].to;
         }
         return route;
     }
@@ -370,6 +389,10 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         if (IERC20(token).allowance(address(this), spender) > 0) {
             IERC20(token).safeApprove(spender, 0);
         }
+    }
+
+    receive() external payable {
+        assert(msg.sender == address(native));
     }
     
 }

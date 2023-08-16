@@ -9,54 +9,94 @@ const { addressBook } = require("blockchain-addressbook");
 const bridgeAbi = require("../artifacts/contracts/bridge/BeefyRevenueBridge.sol/BeefyRevenueBridge.json");
 const {
   tokens: {
-    ETH: { address: native },
+    AVAX: { address: native },
     USDC: { address: stable },
   },
-} = addressBook.arbitrum;
+} = addressBook.avax;
 
 const contractName = "BeefyRevenueBridge";
 
-const stargateParams = {}
-const synapseParams = {}
-const axelarParams = {}
-
 const path = ethers.utils.solidityPack(["address", "uint24", "address"], [native, 500, stable]);
-const bridgeAddress = "0x19330d10D9Cc8751218eaf51E8885D058642E08A";
-const router = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45";
+const route = [native, stable];
+const bridgeAddress = "0x45A01E4e04F14f7A4a6702c74187c5F6222033cd";
+const router = "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106";
 
-const destinationAddress = "0x161D61e30284A33Ab1ed227beDcac6014877B3DE";
-const bridge = "CIRCLE";
-const swap = "UNISWAP_V3";
+const destinationAddress = "0x0EF812f4c68DC84c22A4821EF30ba2ffAB9C2f3A";
+const bridge = "SYNAPSE";
+const swap = "UNISWAP_V2";
+
+const deploy = false;
+const addBridge = true;
+const addSwap = false;
+
+const bridgeContract = "0x8677d4F17E0f1338B7d8582802Bdd1000619152d"
 
 async function main() {
     const abiCoder = new ethers.utils.AbiCoder();
     const Contract = await hre.ethers.getContractFactory(contractName);
-    const contract = await Contract.deploy();
-    await contract.deployed();
-    console.log(`Beefy Revenue Bridge is deployed at: ${contract.address}`);
+   
+    if (deploy) {
+        const contract = await Contract.deploy();
+        await contract.deployed();
+        console.log(`Beefy Revenue Bridge is deployed at: ${contract.address}`);
 
-    await contract.intialize(stable, native);
-    console.log(`Beefy Revenue Bridge intialized`);
+        await contract.intialize(stable, native);
+        console.log(`Beefy Revenue Bridge intialized`);
 
-    await contract.setDestinationAddress([destinationAddress, destinationAddress, destinationAddress]);
-    console.log(`Set Destination Address to: ${destinationAddress}`);
+        await contract.setDestinationAddress([destinationAddress, destinationAddress, destinationAddress]);
+        console.log(`Set Destination Address to: ${destinationAddress}`);
+    } else contract = await ethers.getContractAt(bridgeAbi.abi, bridgeContract);
+    
+    if (addBridge) {
+        if (bridge == "CIRCLE") {
+            let hash = await contract.findHash(bridge);
+            await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["uint32"], [3])]);
+            console.log(`Set bridge to ${bridge}`);
+        }
+    
+        if (bridge == "STARGATE") {
+            let hash = await contract.findHash(bridge);
+            await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["uint16", "uint256", "uint256", "uint256"], [110, 2000000, 1, 1])]);
+            console.log(`Set bridge to ${bridge}`);
+        }
 
-    if (bridge == "CIRCLE") {
-        let hash = await contract.findHash(bridge);
-        await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["uint32"], [1])]);
-        console.log(`Set bridge to ${bridge}`);
+        if (bridge == "SYNAPSE") {
+            let hash = await contract.findHash(bridge);
+            await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["uint256", "uint8", "uint8"], [110, 2000000, 1, 1])]);
+            console.log(`Set bridge to ${bridge}`);
+        }
+
+        if (bridge == "AXELAR") {
+            let hash = await contract.findHash(bridge);
+            await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["string", "string"], [110, 2000000, 1, 1])]);
+            console.log(`Set bridge to ${bridge}`);
+        }
     }
 
-    if (swap == "UNISWAP_V3") {
-        let hash = await contract.findHash(swap);
-        await contract.setActiveSwap(
-            hash,
-            [
-                router,
-                abiCoder.encode(["bytes"], [path])
-            ]
-        );
-        console.log(`Set swap to ${swap}`);
+    if (addSwap) {
+        if (swap == "UNISWAP_V2") {
+            let hash = await contract.findHash(swap);
+            await contract.setActiveSwap(
+                hash,
+                [
+                    router,
+                    abiCoder.encode(["address[]"], [route])
+                ]
+            );
+            console.log(`Set swap to ${swap}`);
+        }
+    
+        if (swap == "UNISWAP_V3") {
+            let hash = await contract.findHash(swap);
+            await contract.setActiveSwap(
+                hash,
+                [
+                    router,
+                    abiCoder.encode(["bytes"], [path])
+                ]
+            );
+            console.log(`Set swap to ${swap}`);
+        }
     }
 }
 

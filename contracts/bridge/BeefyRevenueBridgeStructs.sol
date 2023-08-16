@@ -34,5 +34,6 @@ contract BeefyRevenueBridgeStructs {
         uint256 chainId;
         uint8 tokenIndexFrom;
         uint8 tokenIndexTo;
+        address token;
     }
 }

@@ -29,7 +29,12 @@ module.exports = {
       url: "https://rpc.ankr.com/polygon",
       chainId: 137,
       accounts: accounts
-    }
+    },
+    avax: {
+      url: process.env.AVAX_RPC || "https://rpc.ankr.com/avalanche",
+      chainId: 43114,
+      accounts,
+    },
   },
   solidity: {
     compilers: [
@@ -49,7 +54,8 @@ module.exports = {
       mainnet: process.env.ETH_API_KEY,
       arbitrumOne: process.env.ARBITRUM_API_KEY,
       optimisticEthereum: process.env.OPTIMISM_API_KEY,
-      polygon: process.env.POLYGON_API_KEY
+      polygon: process.env.POLYGON_API_KEY,
+      avalanche: process.env.AVAX_API_KEY,
     },
     customChains: [],
   }
