@@ -4,23 +4,22 @@ import {Test, console} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
 import {BeefyRevenueBridge} from "../../../contracts/bridge/BeefyRevenueBridge.sol";
 import {BeefyRevenueBridgeStructs} from "../../../contracts/bridge/BeefyRevenueBridgeStructs.sol";
-import {ISolidlyRouter} from "../../../contracts/interfaces/swap/ISolidlyRouter.sol";
 import {Path} from "../../../contracts/utils/Path.sol";
 
-contract TestKava is Test, BeefyRevenueBridgeStructs {
+contract TestPolygon is Test, BeefyRevenueBridgeStructs {
     using Path for bytes;
 
-    IERC20 constant stable = IERC20(0xEB466342C4d449BC9f53A865D5Cb90586f405215);
-    IERC20 constant native = IERC20(0xc86c7C0eFbd6A49B35E8714C5f59D99De09A225b);
+    IERC20 constant stable = IERC20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
+    IERC20 constant native = IERC20(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270);
 
     BeefyRevenueBridge bridge;
 
     address user = 0x161D61e30284A33Ab1ed227beDcac6014877B3DE;
-    string activeBridge = "AXELAR";
-    string swap = "SOLIDLY";
+    string activeBridge = "STARGATE";
+    string swap = "UNISWAP_V3_DEADLINE";
     bytes32 activeSwap = keccak256(abi.encode(swap));
-    address activeBridgeAddress = 0xe432150cce91c13a887f7D836923d5597adD8E31;
-    address router = 0xA7544C409d772944017BB95B99484B6E0d7B6388;
+    address activeBridgeAddress = 0x45A01E4e04F14f7A4a6702c74187c5F6222033cd;
+    address router = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
 
     function setUp() public {
         bridge = new BeefyRevenueBridge();
@@ -37,10 +36,11 @@ contract TestKava is Test, BeefyRevenueBridgeStructs {
         bridge.setDestinationAddress(destinationAddress);
     }
 
-    function test_AxelarBridge() public {
+    function test_StargateBridge() public {
         bytes32 bridgeHash = bridge.findHash(activeBridge);
-        Axelar memory axelarParams = Axelar("Polygon", "axlUSDC");
-        bytes memory data = abi.encode(axelarParams);
+
+        Stargate memory stargate = Stargate(110, 1500000, 1, 1);
+        bytes memory data = abi.encode(stargate);
         BridgeParams memory bridgeParams = BridgeParams(activeBridgeAddress, data);
         bridge.setActiveBridge(bridgeHash, bridgeParams);
 
@@ -53,12 +53,17 @@ contract TestKava is Test, BeefyRevenueBridgeStructs {
     }
 
     function setUpSwap() public {
-        bytes32 swapHash = bridge.findHash("SOLIDLY");
+        bytes32 swapHash = bridge.findHash(swap);
 
-        ISolidlyRouter.Routes[] memory route = new ISolidlyRouter.Routes[](1);
-        route[0] = ISolidlyRouter.Routes(address(native), address(stable), false);
+        address[] memory tokens = new address[](2);
+        tokens[0] = address(native);
+        tokens[1] = address(stable);
 
-        bytes memory data = abi.encode(route);
+        uint24[] memory fees = new uint24[](1);
+        fees[0] = 500;
+
+        bytes memory path = routeToPath(tokens, fees);
+        bytes memory data = abi.encode(path);
 
         SwapParams memory swapParams = SwapParams(router, data);
         bridge.setActiveSwap(swapHash, swapParams);
@@ -66,5 +71,18 @@ contract TestKava is Test, BeefyRevenueBridgeStructs {
         // We have allowance for router to spend our native. 
         uint256 approvedAmount = native.allowance(address(bridge), router);
         assertEq(approvedAmount, type(uint256).max);
+    }
+
+    // Convert token route to encoded path
+    // uint24 type for fees so path is packed tightly
+    function routeToPath(
+        address[] memory _route,
+        uint24[] memory _fee
+    ) internal pure returns (bytes memory path) {
+        path = abi.encodePacked(_route[0]);
+        uint256 feeLength = _fee.length;
+        for (uint256 i = 0; i < feeLength; i++) {
+            path = abi.encodePacked(path, _fee[i], _route[i+1]);
+        }
     }
 }

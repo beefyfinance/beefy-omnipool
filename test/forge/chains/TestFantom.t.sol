@@ -7,20 +7,20 @@ import {BeefyRevenueBridgeStructs} from "../../../contracts/bridge/BeefyRevenueB
 import {ISolidlyRouter} from "../../../contracts/interfaces/swap/ISolidlyRouter.sol";
 import {Path} from "../../../contracts/utils/Path.sol";
 
-contract TestKava is Test, BeefyRevenueBridgeStructs {
+contract TestFantom is Test, BeefyRevenueBridgeStructs {
     using Path for bytes;
 
-    IERC20 constant stable = IERC20(0xEB466342C4d449BC9f53A865D5Cb90586f405215);
-    IERC20 constant native = IERC20(0xc86c7C0eFbd6A49B35E8714C5f59D99De09A225b);
+    IERC20 constant stable = IERC20(0x1B6382DBDEa11d97f24495C9A90b7c88469134a4);
+    IERC20 constant native = IERC20(0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83);
 
     BeefyRevenueBridge bridge;
 
     address user = 0x161D61e30284A33Ab1ed227beDcac6014877B3DE;
     string activeBridge = "AXELAR";
-    string swap = "SOLIDLY";
+    string swap = "UNISWAP_V2";
     bytes32 activeSwap = keccak256(abi.encode(swap));
-    address activeBridgeAddress = 0xe432150cce91c13a887f7D836923d5597adD8E31;
-    address router = 0xA7544C409d772944017BB95B99484B6E0d7B6388;
+    address activeBridgeAddress = 0x304acf330bbE08d1e512eefaa92F6a57871fD895;
+    address router = 0xF491e7B69E4244ad4002BC14e878a34207E38c29;
 
     function setUp() public {
         bridge = new BeefyRevenueBridge();
@@ -53,10 +53,11 @@ contract TestKava is Test, BeefyRevenueBridgeStructs {
     }
 
     function setUpSwap() public {
-        bytes32 swapHash = bridge.findHash("SOLIDLY");
+        bytes32 swapHash = bridge.findHash(swap);
 
-        ISolidlyRouter.Routes[] memory route = new ISolidlyRouter.Routes[](1);
-        route[0] = ISolidlyRouter.Routes(address(native), address(stable), false);
+        address[] memory route = new address[](2);
+        route[0] = address(native);
+        route[1] = address(stable);
 
         bytes memory data = abi.encode(route);
 

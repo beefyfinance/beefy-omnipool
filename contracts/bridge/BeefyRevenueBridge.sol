@@ -108,6 +108,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         swapToUse[keccak256(abi.encode("SOLIDLY"))] = "swapSolidly()";
         swapToUse[keccak256(abi.encode("UNISWAP_V3"))] = "swapUniV3()";
         swapToUse[keccak256(abi.encode("UNISWAP_V3_DEADLINE"))] = "swapUniV3Deadline()";
+        swapToUse[keccak256(abi.encode("ALGEBRA"))] = "swapAlgebra()";
         swapToUse[keccak256(abi.encode("BALANCER"))] = "swapBalancer()";
     }
 
@@ -281,13 +282,13 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         uint256 bal = _balanceOfStable();
 
         if (bal > minBridgeAmount) {
-            IzkEVM(bridgeParams.bridge).send(
+            IzkEVM(bridgeParams.bridge).bridgeAsset(
+                0,
                 destinationAddress.destination,
-                address(stable),
                 bal,
-                1,
-                uint64(block.timestamp),
-                10000
+                address(stable),
+                true,
+                ""
             );
         }
     }
@@ -347,6 +348,16 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         UniV3Actions.swapV3WithDeadline(swapParams.router, path, bal);
     }
 
+    function swapAlgebra() external onlyThis {
+        address[] memory route = abi.decode(swapParams.params, (address[]));
+        if (route[0] != address(native)) revert IncorrectRoute();
+        if (route[route.length - 1] != address(stable)) revert IncorrectRoute();
+
+        bytes memory path = _routeToPath(route);
+        uint256 bal = _balanceOfNative();
+        UniV3Actions.swapV3WithDeadline(swapParams.router, path, bal);
+    }
+
     function swapBalancer() external onlyThis {
         (BeefyBalancerStructs.BatchSwapStruct[] memory route, address[] memory assets) = abi.decode(swapParams.params, (BeefyBalancerStructs.BatchSwapStruct[],address[]));
         if (assets[0] != address(native)) revert IncorrectRoute();
@@ -382,6 +393,15 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
             _path = _path.skipToken();
         }
         return route;
+    }
+    
+    // Convert token route to encoded path
+    // uint24 type for fees so path is packed tightly
+    function _routeToPath(address[] memory _route) private pure returns (bytes memory path) {
+        path = abi.encodePacked(_route[0]);
+        for (uint256 i = 1; i < _route.length; i++) {
+            path = abi.encodePacked(path, _route[i]);
+        }
     }
 
     function _solidlyToRoute(ISolidlyRouter.Routes[] memory _route) private pure returns (address[] memory) {

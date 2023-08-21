@@ -56,7 +56,6 @@ contract BeefyRevenueBridgeTest is Test, BeefyRevenueBridgeStructs {
         
         vm.startPrank(user);
         deal(address(native), address(bridge), 10 ether);
-        uint256 bal = native.balanceOf(address(bridge));
         bridge.harvest();
         vm.stopPrank();
     }

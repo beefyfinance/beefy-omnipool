@@ -7,20 +7,20 @@ import {BeefyRevenueBridgeStructs} from "../../../contracts/bridge/BeefyRevenueB
 import {ISolidlyRouter} from "../../../contracts/interfaces/swap/ISolidlyRouter.sol";
 import {Path} from "../../../contracts/utils/Path.sol";
 
-contract TestKava is Test, BeefyRevenueBridgeStructs {
+contract TestZkSync is Test, BeefyRevenueBridgeStructs {
     using Path for bytes;
 
-    IERC20 constant stable = IERC20(0xEB466342C4d449BC9f53A865D5Cb90586f405215);
-    IERC20 constant native = IERC20(0xc86c7C0eFbd6A49B35E8714C5f59D99De09A225b);
+    IERC20 constant stable = IERC20(0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4);
+    IERC20 constant native = IERC20(0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91);
 
     BeefyRevenueBridge bridge;
 
     address user = 0x161D61e30284A33Ab1ed227beDcac6014877B3DE;
-    string activeBridge = "AXELAR";
+    string activeBridge = "zkSYNC";
     string swap = "SOLIDLY";
     bytes32 activeSwap = keccak256(abi.encode(swap));
-    address activeBridgeAddress = 0xe432150cce91c13a887f7D836923d5597adD8E31;
-    address router = 0xA7544C409d772944017BB95B99484B6E0d7B6388;
+    address activeBridgeAddress = 0x11f943b2c77b743AB90f4A0Ae7d5A4e7FCA3E102;
+    address router = 0x46dbd39e26a56778d88507d7aEC6967108C0BD36;
 
     function setUp() public {
         bridge = new BeefyRevenueBridge();
@@ -37,10 +37,9 @@ contract TestKava is Test, BeefyRevenueBridgeStructs {
         bridge.setDestinationAddress(destinationAddress);
     }
 
-    function test_AxelarBridge() public {
+    function test_zkSyncBridge() public {
         bytes32 bridgeHash = bridge.findHash(activeBridge);
-        Axelar memory axelarParams = Axelar("Polygon", "axlUSDC");
-        bytes memory data = abi.encode(axelarParams);
+        bytes memory data = abi.encode("");
         BridgeParams memory bridgeParams = BridgeParams(activeBridgeAddress, data);
         bridge.setActiveBridge(bridgeHash, bridgeParams);
 
@@ -48,6 +47,7 @@ contract TestKava is Test, BeefyRevenueBridgeStructs {
         
         vm.startPrank(user);
         deal(address(native), address(bridge), 10 ether);
+        console.log(10);
         bridge.harvest();
         vm.stopPrank();
     }

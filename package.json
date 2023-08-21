@@ -10,8 +10,15 @@
     "deploy": "npx hardhat run scripts/deploy.js --network",
     "deploy:bridge": "npx hardhat run scripts/deployBridge.js --network",
     "test:arbitrum": "forge test --match-path test/forge/chains/TestArbitrum.t.sol --fork-url https://rpc.ankr.com/arbitrum -vvv",
+    "test:base": "forge test --match-path test/forge/chains/TestBase.t.sol --fork-url https://developer-access-mainnet.base.org -vvv",
+    "test:bnb": "forge test --match-path test/forge/chains/TestBnb.t.sol --fork-url https://binance.nodereal.io -vvv",
     "test:canto": "forge test --match-path test/forge/chains/TestCanto.t.sol --fork-url https://canto.slingshot.finance -vvv",
-    "test:kava": "forge test --match-path test/forge/chains/TestKava.t.sol --fork-url https://evm2.kava.io -vvv"
+    "test:fantom": "forge test --match-path test/forge/chains/TestFantom.t.sol --fork-url https://rpc.ankr.com/fantom -vvv",
+    "test:kava": "forge test --match-path test/forge/chains/TestKava.t.sol --fork-url https://evm2.kava.io -vvv",
+    "test:optimism": "forge test --match-path test/forge/chains/TestOptimism.t.sol --fork-url https://rpc.ankr.com/optimism -vvv",
+    "test:polygon": "forge test --match-path test/forge/chains/TestPolygon.t.sol --fork-url https://polygon-rpc.com -vvv",
+    "test:zkevm": "forge test --match-path test/forge/chains/TestZkevm.t.sol --fork-url https://zkevm-rpc.com -vvv",
+    "test:zksync": "forge test --match-path test/forge/chains/TestZkSync.t.sol --fork-url https://mainnet.era.zksync.io -vvvv"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
