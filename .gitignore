@@ -13,3 +13,6 @@ artifacts
 # Solidity
 /cache
 /artifacts
+/out
+/lib
+/cache_forge

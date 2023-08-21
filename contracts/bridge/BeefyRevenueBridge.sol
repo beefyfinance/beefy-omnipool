@@ -70,7 +70,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     error NotEnoughEth();
     error FailedToSendEther();
 
-    function intialize(
+    function initialize(
         IERC20 _stable,
         IERC20 _native
     ) external initializer {

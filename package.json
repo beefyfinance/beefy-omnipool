@@ -8,7 +8,10 @@
   "scripts": {
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy.js --network",
-    "deploy:bridge": "npx hardhat run scripts/deployBridge.js --network"
+    "deploy:bridge": "npx hardhat run scripts/deployBridge.js --network",
+    "test:arbitrum": "forge test --match-path test/forge/chains/TestArbitrum.t.sol --fork-url https://rpc.ankr.com/arbitrum -vvv",
+    "test:canto": "forge test --match-path test/forge/chains/TestCanto.t.sol --fork-url https://canto.slingshot.finance -vvv",
+    "test:kava": "forge test --match-path test/forge/chains/TestKava.t.sol --fork-url https://evm2.kava.io -vvv"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
@@ -34,6 +37,7 @@
   },
   "dependencies": {
     "blockchain-addressbook": "^0.43.76",
+    "forge-std": "^1.1.2",
     "solmate": "^6.1.0"
   }
 }

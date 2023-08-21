@@ -1,116 +1,123 @@
 pragma solidity 0.8.19;
 
-import "forge-std/Test.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {TransmutationVelocimeter} from "../../contracts/TransmutationVelocimeter.sol";
-import {ISolidlyRouter} from "../../contracts/interfaces/ISolidlyRouter.sol";
-import {IBeefyVault} from "../../contracts/interfaces/IBeefyVault.sol";
-import {IBalancerVault} from "../../contracts/interfaces/IBalancerVault.sol";
-import {IBeefyZap} from "../../contracts/interfaces/IBeefyZap.sol";
-import {ISolidlyRouter} from "../../contracts/interfaces/ISolidlyRouter.sol";
-import {IOToken} from "../../contracts/interfaces/IOToken.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
+import {BeefyRevenueBridge} from "../../contracts/bridge/BeefyRevenueBridge.sol";
+import {BeefyRevenueBridgeStructs} from "../../contracts/bridge/BeefyRevenueBridgeStructs.sol";
+import {ISolidlyRouter} from "../../contracts/interfaces/swap/ISolidlyRouter.sol";
+import {Path} from "../../contracts/utils/Path.sol";
 
-contract TransmutationVelocimeterTest is Test {
-    IOToken constant oToken = IOToken(0x762eb51D2e779EeEc9B239FFB0B2eC8262848f3E);
-    address constant underlying = 0xd386a121991E51Eab5e3433Bf5B1cF4C8884b47a;
-    address constant paymentToken = 0x4200000000000000000000000000000000000006;
-    address constant flashPool = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
-    address constant router = 0xE11b93B61f6291d35c5a2beA0A9fF169080160cF;
-    address constant treasury = 0x8930443140811D84Efe6CB4E9A5B9da02E6832F6;
-    address constant native = 0x4200000000000000000000000000000000000006;
-    address constant want = 0x9BA0F14512Ee29AbdbE2E5eA27a5D5836ef97F40;
-    address constant partner = 0xfA89A4C7F79Dc4111c116a0f01061F4a7D9fAb73;
-    address constant zap = 0x5d2EF803D6e255eF4D1c66762CBc8845051B54dB;
+contract BeefyRevenueBridgeTest is Test, BeefyRevenueBridgeStructs {
+    using Path for bytes;
 
-    TransmutationVelocimeter transmuteContract;
+    IERC20 constant stable = IERC20(0xaf88d065e77c8cC2239327C5EDb3A432268e5831);
+    IERC20 constant native = IERC20(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
 
-    address user = 0x8930443140811D84Efe6CB4E9A5B9da02E6832F6;
-    uint256 slippage = .80 ether;
+    BeefyRevenueBridge bridge;
 
-    function routes() internal pure returns(
-        ISolidlyRouter.Routes[] memory oTokenToUnderlyingPath,
-        ISolidlyRouter.Routes[] memory underlyingToPaymentTokenPath,
-        ISolidlyRouter.Routes[] memory underlyingToWantPath,
-        ISolidlyRouter.Routes[] memory paymentTokenToUnderlying
-    ) {
-        oTokenToUnderlyingPath = new ISolidlyRouter.Routes[](1);
-        oTokenToUnderlyingPath[0] = ISolidlyRouter.Routes(address(oToken), address(underlying), false);
-
-        underlyingToPaymentTokenPath = new ISolidlyRouter.Routes[](1);
-        underlyingToPaymentTokenPath[0] = ISolidlyRouter.Routes(address(underlying), paymentToken, false);
-
-        underlyingToWantPath = new ISolidlyRouter.Routes[](1);
-        underlyingToWantPath[0] = ISolidlyRouter.Routes(paymentToken, native, false);
-
-        paymentTokenToUnderlying = new ISolidlyRouter.Routes[](1);
-        paymentTokenToUnderlying[0] = ISolidlyRouter.Routes(native, underlying, false);
-    }
+    address user = 0x161D61e30284A33Ab1ed227beDcac6014877B3DE;
+    string activeBridge = "CIRCLE";
+    string swap = "UNISWAP_V3_DEADLINE";
+    bytes32 activeSwap = keccak256(abi.encode(swap));
+    address activeBridgeAddress = 0x19330d10D9Cc8751218eaf51E8885D058642E08A;
+    address router = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
 
     function setUp() public {
-        transmuteContract = new TransmutationVelocimeter();
-        startContract();
+        bridge = new BeefyRevenueBridge();
+        initContract();
     }
 
-    function startContract() public {
-        (
-            ISolidlyRouter.Routes[] memory otokenToUnderlying, 
-            ISolidlyRouter.Routes[] memory underlyingToPaymentToken, 
-            ISolidlyRouter.Routes[] memory wantPath,
-            ISolidlyRouter.Routes[] memory underlyingPath
-        ) = routes();
-
-        transmuteContract.initialize(
-            IERC20(underlying),
-            oToken,
-            IERC20(paymentToken),
-            IBalancerVault(flashPool),
-            native,
-            ISolidlyRouter(router),
-            treasury,
-            IBeefyZap(zap),
-            otokenToUnderlying,
-            underlyingToPaymentToken
+    function initContract() public {
+        bridge.initialize(
+            stable, 
+            native
         );
 
-        transmuteContract.setPartner(partner);
-        transmuteContract.setProtocolFee(2e16, 1e16);
-        transmuteContract.toggleWantApproval(native, true);
-        transmuteContract.addWantToken(want, wantPath, true);
-        transmuteContract.addWantToken(underlying, underlyingPath, false);
+        DestinationAddress memory destinationAddress = DestinationAddress(0x161D61e30284A33Ab1ed227beDcac6014877B3DE, "0x161D61e30284A33Ab1ed227beDcac6014877B3DE", "0x161D61e30284A33Ab1ed227beDcac6014877B3DE");
+        bridge.setDestinationAddress(destinationAddress);
     }
+/*
+    function test_AxelarBridge() public {
+        bytes32 bridgeHash = bridge.findHash(activeBridge);
+        Axelar memory axelarParams = Axelar("Polygon", "axlUSDC");
+        bytes memory data = abi.encode(axelarParams);
+        BridgeParams memory bridgeParams = BridgeParams(activeBridgeAddress, data);
+        bridge.setActiveBridge(bridgeHash, bridgeParams);
 
-    function test_transmuteToNative() public {
+        setUpSwap();
+        
         vm.startPrank(user);
-        deal(address(oToken), user, 10 ether);
-        IERC20(address(oToken)).approve(address(transmuteContract), 10 ether);
-        uint256 amountOut = transmuteContract.getAmountOut(native, 1 ether);
-        //console.log(amountOut);
-        uint256 minAmountOut = amountOut * slippage / 1 ether;
-        //console.log(minAmountOut);
-        uint256 wantAmount = transmuteContract.transmute(native, 1 ether, minAmountOut);
-        console.log(wantAmount);
+        deal(address(native), address(bridge), 10 ether);
+        uint256 bal = native.balanceOf(address(bridge));
+        console.log(bal);
+        bridge.harvest();
+        vm.stopPrank();
+    }
+*/
+    function test_CircleBridge() public {
+        bytes32 bridgeHash = bridge.findHash(activeBridge);
+        uint32 destinationDomain = 0;
+        bytes memory data = abi.encode(destinationDomain);
+        BridgeParams memory bridgeParams = BridgeParams(activeBridgeAddress, data);
+        bridge.setActiveBridge(bridgeHash, bridgeParams);
+
+        setUpSwap();
+        
+        vm.startPrank(user);
+        deal(address(native), address(bridge), 10 ether);
+        uint256 bal = native.balanceOf(address(bridge));
+        console.log(bal);
+        bridge.harvest();
         vm.stopPrank();
     }
 
-    function test_transmuteToUnderlying() public {
-        vm.startPrank(user);
-        deal(address(oToken), user, 10 ether);
-        IERC20(address(oToken)).approve(address(transmuteContract), 10 ether);
-        uint256 amountOut = transmuteContract.getAmountOut(underlying, 1 ether);
-        uint256 minAmountOut = amountOut * slippage / 1 ether;
-        uint256 wantAmount = transmuteContract.transmute(underlying, 1 ether, minAmountOut);
-        console.log(wantAmount);
-        vm.stopPrank();
+    function setUpSwap() public {
+        if (activeSwap == keccak256(abi.encode("SOLIDLY"))) {
+            bytes32 swapHash = bridge.findHash("SOLIDLY");
+
+            ISolidlyRouter.Routes[] memory route = new ISolidlyRouter.Routes[](1);
+            route[0] = ISolidlyRouter.Routes(address(native), address(stable), false);
+
+            bytes memory data = abi.encode(route);
+
+            SwapParams memory swapParams = SwapParams(router, data);
+            bridge.setActiveSwap(swapHash, swapParams);
+
+            // We have allowance for router to spend our native. 
+            uint256 approvedAmount = native.allowance(address(bridge), router);
+            assertEq(approvedAmount, type(uint256).max);
+        } else if (activeSwap == keccak256(abi.encode("UNISWAP_V3_DEADLINE"))) {
+            bytes32 swapHash = bridge.findHash(swap);
+
+            address[] memory tokens = new address[](2);
+            tokens[0] = address(native);
+            tokens[1] = address(stable);
+
+            uint24[] memory fees = new uint24[](1);
+            fees[0] = 500;
+
+            bytes memory path = routeToPath(tokens, fees);
+            bytes memory data = abi.encode(path);
+
+            SwapParams memory swapParams = SwapParams(router, data);
+            bridge.setActiveSwap(swapHash, swapParams);
+
+            // We have allowance for router to spend our native. 
+            uint256 approvedAmount = native.allowance(address(bridge), router);
+            assertEq(approvedAmount, type(uint256).max);
+        }
     }
 
-    function test_transmuteToMooToken() public {
-        vm.startPrank(user);
-        deal(address(oToken), user, 10 ether);
-        IERC20(address(oToken)).approve(address(transmuteContract), 10 ether);
-        uint256 amountOut = transmuteContract.getAmountOut(want, 1 ether);
-        uint256 minAmountOut = amountOut * slippage / 1 ether;
-        uint256 wantAmount = transmuteContract.transmute(want, 1 ether, minAmountOut);
-        console.log(wantAmount);
-        vm.stopPrank();
+    // Convert token route to encoded path
+    // uint24 type for fees so path is packed tightly
+    function routeToPath(
+        address[] memory _route,
+        uint24[] memory _fee
+    ) internal pure returns (bytes memory path) {
+        path = abi.encodePacked(_route[0]);
+        uint256 feeLength = _fee.length;
+        for (uint256 i = 0; i < feeLength; i++) {
+            path = abi.encodePacked(path, _fee[i], _route[i+1]);
+        }
     }
 }

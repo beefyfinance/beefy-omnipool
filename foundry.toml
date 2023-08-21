@@ -11,7 +11,6 @@ remappings = [
     '@openzeppelin/=node_modules/@openzeppelin/',
     '@uniswap/=node_modules/@uniswap/',
     'base64-sol/=node_modules/base64-sol/',
-    'ds-test/=node_modules/ds-test/src/',
     'eth-gas-reporter/=node_modules/eth-gas-reporter/',
     'forge-std/=node_modules/forge-std/',
     'lib/forge-std:ds-test/=lib/forge-std/lib/ds-test/src/',
