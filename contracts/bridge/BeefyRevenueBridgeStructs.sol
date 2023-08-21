@@ -35,5 +35,7 @@ contract BeefyRevenueBridgeStructs {
         uint8 tokenIndexFrom;
         uint8 tokenIndexTo;
         address token;
+        uint8 dstIndexFrom;
+        uint8 dstIndexTo;
     }
 }

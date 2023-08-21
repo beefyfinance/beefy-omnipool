@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 interface ISynapse {
 
-    function swapAndRedeem(
+    function swapAndRedeemAndSwap(
         address to,
         uint256 chainId,
         address token,
@@ -11,6 +11,10 @@ interface ISynapse {
         uint8 tokenIndexTo,
         uint256 dx,
         uint256 minDy,
-        uint256 deadline
+        uint256 deadline,
+        uint8 swapIndexFrom,
+        uint8 swapIndexTo,
+        uint256 min,
+        uint256 swapTime
     ) external;
 }

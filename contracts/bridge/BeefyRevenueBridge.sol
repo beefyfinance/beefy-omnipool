@@ -68,6 +68,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     error NotAuthorized();
     error IncorrectRoute();
     error NotEnoughEth();
+    error FailedToSendEther();
 
     function intialize(
         IERC20 _stable,
@@ -127,6 +128,21 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         );
     }
 
+    function wrapNative() external onlyOwner {
+        IWrappedNative(address(native)).deposit{value: address(this).balance}();
+    }
+
+     function inCaseTokensGetStuck(address _token, bool _native) external onlyOwner {
+        if (_native) {
+            uint256 _nativeAmount = address(this).balance;
+            (bool sent,) = msg.sender.call{value: _nativeAmount}("");
+            if(!sent) revert FailedToSendEther();
+        } else {
+            uint256 _amount = IERC20(_token).balanceOf(address(this));
+            IERC20(_token).safeTransfer(msg.sender, _amount);
+        }
+    }
+
     function setActiveBridge(bytes32 _bridgeHash, BridgeParams calldata _params) external onlyOwner {
         emit SetBridge(_bridgeHash, _params);
 
@@ -175,7 +191,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
             ICircle(bridgeParams.bridge).depositForBurn(
                 bal,
                 destinationDomain,
-                 bytes32(uint256(uint160(destinationAddress.destination))),
+                bytes32(uint256(uint160(destinationAddress.destination))),
                 address(stable)
             );
         }
@@ -243,7 +259,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         uint256 bal = _balanceOfStable();
 
         if (bal > minBridgeAmount) {
-            ISynapse(bridgeParams.bridge).swapAndRedeem(
+            ISynapse(bridgeParams.bridge).swapAndRedeemAndSwap(
                 destinationAddress.destination,
                 params.chainId,
                 params.token,
@@ -251,7 +267,11 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
                 params.tokenIndexTo,
                 bal,
                 0,
-                block.timestamp
+                block.timestamp,
+                params.dstIndexFrom,
+                params.dstIndexTo,
+                0,
+                block.timestamp + 1 hours
             );
         }
     }
@@ -394,5 +414,4 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     receive() external payable {
         assert(msg.sender == address(native));
     }
-    
 }
