@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-foundry");
+require('@openzeppelin/hardhat-upgrades');
 
 require('dotenv').config()
 const accounts = [process.env.DEPLOYER_PK];
@@ -34,9 +35,10 @@ module.exports = {
       accounts,
     },
     polygon: {
-      url: "https://polygon-rpc.com",
+      url: "https://polygon.llamarpc.com",
       chainId: 137,
       accounts,
+      gasPrice: 300000000000
     },
     fantom: {
       url: process.env.FANTOM_RPC || "https://rpc.ankr.com/fantom",
@@ -125,7 +127,7 @@ module.exports = {
       accounts,
     },
     canto: {
-      url: process.env.CANTO_RPC || "https://canto.slingshot.finance",
+      url: process.env.CANTO_RPC || "https://jsonrpc.canto.nodestake.top",
       chainId: 7700,
       accounts,
     },

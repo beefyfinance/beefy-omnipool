@@ -4,23 +4,22 @@ import {Test, console} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
 import {BeefyRevenueBridge} from "../../../contracts/bridge/BeefyRevenueBridge.sol";
 import {Structs} from "../../../contracts/bridge/Structs.sol";
-import {ISolidlyRouter} from "../../../contracts/interfaces/swap/ISolidlyRouter.sol";
 import {Path} from "../../../contracts/utils/Path.sol";
 
-contract TestFantom is Test, Structs {
+contract TestMetis is Test, Structs {
     using Path for bytes;
 
-    IERC20 constant stable = IERC20(0x1B6382DBDEa11d97f24495C9A90b7c88469134a4);
-    IERC20 constant native = IERC20(0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83);
+    IERC20 constant stable = IERC20(0xEA32A96608495e54156Ae48931A7c20f0dcc1a21);
+    IERC20 constant native = IERC20(0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000);
 
     BeefyRevenueBridge bridge;
 
     address user = 0x161D61e30284A33Ab1ed227beDcac6014877B3DE;
-    string activeBridge = "AXELAR";
+    string activeBridge = "SYNAPSE";
     string swap = "UNISWAP_V2";
     bytes32 activeSwap = keccak256(abi.encode(swap));
-    address activeBridgeAddress = 0x304acf330bbE08d1e512eefaa92F6a57871fD895;
-    address router = 0xF491e7B69E4244ad4002BC14e878a34207E38c29;
+    address activeBridgeAddress = 0xC35a456138dE0634357eb47Ba5E74AFE9faE9a98;
+    address router = 0x1E876cCe41B7b844FDe09E38Fa1cf00f213bFf56;
 
     function setUp() public {
         bridge = new BeefyRevenueBridge();
@@ -36,10 +35,17 @@ contract TestFantom is Test, Structs {
         bridge.setDestinationAddress(destinationAddress);
     }
 
-    function test_AxelarBridge() public {
+     function test_SynapseBridge() public {
         bytes32 bridgeHash = bridge.findHash(activeBridge);
-        Axelar memory axelarParams = Axelar("Polygon", "axlUSDC");
-        bytes memory data = abi.encode(axelarParams);
+        Synapse memory synapseParams = Synapse(
+            137,
+            1,
+            0,
+            0x961318Fc85475E125B99Cc9215f62679aE5200aB,
+            0,
+            2
+        );
+        bytes memory data = abi.encode(synapseParams);
         BridgeParams memory bridgeParams = BridgeParams(activeBridgeAddress, data);
         bridge.setActiveBridge(bridgeHash, bridgeParams);
 

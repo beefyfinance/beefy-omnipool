@@ -1,0 +1,642 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0x4a5eBD71fD6926eA14dcf103c43076d2fE871b3d",
+      "txHash": "0x83057e18c02f92b16dba32e508fde45a2d27cc5fad55c58a10a27e55e43ae34f",
+      "kind": "uups"
+    },
+    {
+      "address": "0x434c19Fbf713c0c3F8F3fF7Fb18e2De03dd5bC06",
+      "txHash": "0xddff4a0ad0b7bac07d6aa00387fa628e2172154535a0f005d15d00b14d614dd0",
+      "kind": "uups"
+    },
+    {
+      "address": "0xCE1eC938aD3b0Bec5bd3Ee0d9c37446e8D54B5A7",
+      "txHash": "0xd3e53093f66c03aa171c4026166ab59bcd13f36cb52e915f6e3072c6743d815a",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "9095c292190b1088b2740517c8c159f95000941a67f6595a77e3ade82238c9cb": {
+      "address": "0x22599Efb7f79ffE04ABc06146E9042Cd70880b6E",
+      "txHash": "0xb99770fe0d80ea6642c319b606caa4e104bf820cc0c7e281be4405ff2be3ddff",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "stable",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_contract(IERC20)664",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:44"
+          },
+          {
+            "label": "native",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_contract(IERC20)664",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:45"
+          },
+          {
+            "label": "activeBridge",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_bytes32",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:48"
+          },
+          {
+            "label": "activeSwap",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_bytes32",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:49"
+          },
+          {
+            "label": "bridgeParams",
+            "offset": 0,
+            "slot": "205",
+            "type": "t_struct(BridgeParams)4534_storage",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:50"
+          },
+          {
+            "label": "swapParams",
+            "offset": 0,
+            "slot": "207",
+            "type": "t_struct(SwapParams)4539_storage",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:51"
+          },
+          {
+            "label": "destinationAddress",
+            "offset": 0,
+            "slot": "209",
+            "type": "t_struct(DestinationAddress)4546_storage",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:52"
+          },
+          {
+            "label": "swapKind",
+            "offset": 0,
+            "slot": "212",
+            "type": "t_enum(SwapKind)4844",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:55"
+          },
+          {
+            "label": "funds",
+            "offset": 0,
+            "slot": "213",
+            "type": "t_struct(FundManagement)4830_storage",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:56"
+          },
+          {
+            "label": "minBridgeAmount",
+            "offset": 0,
+            "slot": "215",
+            "type": "t_uint256",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:58"
+          },
+          {
+            "label": "bridgeToUse",
+            "offset": 0,
+            "slot": "216",
+            "type": "t_mapping(t_bytes32,t_string_storage)",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:61"
+          },
+          {
+            "label": "swapToUse",
+            "offset": 0,
+            "slot": "217",
+            "type": "t_mapping(t_bytes32,t_string_storage)",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:62"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_address_payable": {
+            "label": "address payable",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes_storage": {
+            "label": "bytes",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC20)664": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(SwapKind)4844": {
+            "label": "enum IBalancerVault.SwapKind",
+            "members": [
+              "GIVEN_IN",
+              "GIVEN_OUT"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_bytes32,t_string_storage)": {
+            "label": "mapping(bytes32 => string)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(BridgeParams)4534_storage": {
+            "label": "struct Structs.BridgeParams",
+            "members": [
+              {
+                "label": "bridge",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "params",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(DestinationAddress)4546_storage": {
+            "label": "struct Structs.DestinationAddress",
+            "members": [
+              {
+                "label": "destination",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "destinationBytes",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "destinationString",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(FundManagement)4830_storage": {
+            "label": "struct IBalancerVault.FundManagement",
+            "members": [
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "fromInternalBalance",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "recipient",
+                "type": "t_address_payable",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "toInternalBalance",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SwapParams)4539_storage": {
+            "label": "struct Structs.SwapParams",
+            "members": [
+              {
+                "label": "router",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "params",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "af97de89b322297acb81b72836936e070650a2bb66a9476efb7afd7da25eff07": {
+      "address": "0xC7B02cd0BD97371889a7C861e7210d2A5027c751",
+      "txHash": "0xa7d27e7e3a2e56f97c162262ed5d9a092e2e63746947cec731b14140b753271f",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:169"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:111"
+          },
+          {
+            "label": "swapKind",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_enum(SwapKind)4836",
+            "contract": "Structs",
+            "src": "contracts/bridge/Structs.sol:8"
+          },
+          {
+            "label": "funds",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_struct(FundManagement)4822_storage",
+            "contract": "Structs",
+            "src": "contracts/bridge/Structs.sol:9"
+          },
+          {
+            "label": "stable",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_contract(IERC20)664",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:44"
+          },
+          {
+            "label": "native",
+            "offset": 0,
+            "slot": "205",
+            "type": "t_contract(IERC20)664",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:45"
+          },
+          {
+            "label": "activeBridge",
+            "offset": 0,
+            "slot": "206",
+            "type": "t_bytes32",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:48"
+          },
+          {
+            "label": "activeSwap",
+            "offset": 0,
+            "slot": "207",
+            "type": "t_bytes32",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:49"
+          },
+          {
+            "label": "bridgeParams",
+            "offset": 0,
+            "slot": "208",
+            "type": "t_struct(BridgeParams)4526_storage",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:50"
+          },
+          {
+            "label": "swapParams",
+            "offset": 0,
+            "slot": "210",
+            "type": "t_struct(SwapParams)4531_storage",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:51"
+          },
+          {
+            "label": "destinationAddress",
+            "offset": 0,
+            "slot": "212",
+            "type": "t_struct(DestinationAddress)4538_storage",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:52"
+          },
+          {
+            "label": "minBridgeAmount",
+            "offset": 0,
+            "slot": "215",
+            "type": "t_uint256",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:53"
+          },
+          {
+            "label": "bridgeToUse",
+            "offset": 0,
+            "slot": "216",
+            "type": "t_mapping(t_bytes32,t_string_storage)",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:56"
+          },
+          {
+            "label": "swapToUse",
+            "offset": 0,
+            "slot": "217",
+            "type": "t_mapping(t_bytes32,t_string_storage)",
+            "contract": "BeefyRevenueBridge",
+            "src": "contracts/bridge/BeefyRevenueBridge.sol:57"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_address_payable": {
+            "label": "address payable",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes_storage": {
+            "label": "bytes",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC20)664": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(SwapKind)4836": {
+            "label": "enum IBalancerVault.SwapKind",
+            "members": [
+              "GIVEN_IN",
+              "GIVEN_OUT"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_bytes32,t_string_storage)": {
+            "label": "mapping(bytes32 => string)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(BridgeParams)4526_storage": {
+            "label": "struct Structs.BridgeParams",
+            "members": [
+              {
+                "label": "bridge",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "params",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(DestinationAddress)4538_storage": {
+            "label": "struct Structs.DestinationAddress",
+            "members": [
+              {
+                "label": "destination",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "destinationBytes",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "destinationString",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(FundManagement)4822_storage": {
+            "label": "struct IBalancerVault.FundManagement",
+            "members": [
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "fromInternalBalance",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "0"
+              },
+              {
+                "label": "recipient",
+                "type": "t_address_payable",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "toInternalBalance",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(SwapParams)4531_storage": {
+            "label": "struct Structs.SwapParams",
+            "members": [
+              {
+                "label": "router",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "params",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}

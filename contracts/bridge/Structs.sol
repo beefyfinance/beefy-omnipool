@@ -1,7 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-contract BeefyRevenueBridgeStructs {
+import {IBalancerVault} from "../interfaces/swap/IBalancerVault.sol";
+
+contract Structs {
+    // Will be unused if we dont swap with balancer
+    IBalancerVault.SwapKind public swapKind;
+    IBalancerVault.FundManagement public funds;
+
+    struct Cowllector {
+        bool sendFunds;
+        address cowllector;
+        uint256 amountCowllectorNeeds;
+    }
+
     struct BridgeParams {
         address bridge;
         bytes params;

@@ -3,11 +3,11 @@ pragma solidity 0.8.19;
 import {Test, console} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
 import {BeefyRevenueBridge} from "../../../contracts/bridge/BeefyRevenueBridge.sol";
-import {BeefyRevenueBridgeStructs} from "../../../contracts/bridge/BeefyRevenueBridgeStructs.sol";
+import {Structs} from "../../../contracts/bridge/Structs.sol";
 import {ISolidlyRouter} from "../../../contracts/interfaces/swap/ISolidlyRouter.sol";
 import {Path} from "../../../contracts/utils/Path.sol";
 
-contract TestOptimism is Test, BeefyRevenueBridgeStructs {
+contract TestOptimism is Test, Structs {
     using Path for bytes;
 
     IERC20 constant stable = IERC20(0x7F5c764cBc14f9669B88837ca1490cCa17c31607);
@@ -28,10 +28,9 @@ contract TestOptimism is Test, BeefyRevenueBridgeStructs {
     }
 
     function initContract() public {
-        bridge.initialize(
-            stable, 
-            native
-        );
+        bridge.initialize();
+
+        bridge.setStable(stable, native);
 
         DestinationAddress memory destinationAddress = DestinationAddress(0x161D61e30284A33Ab1ed227beDcac6014877B3DE, "0x161D61e30284A33Ab1ed227beDcac6014877B3DE", "0x161D61e30284A33Ab1ed227beDcac6014877B3DE");
         bridge.setDestinationAddress(destinationAddress);
@@ -40,7 +39,7 @@ contract TestOptimism is Test, BeefyRevenueBridgeStructs {
     function test_StargateBridge() public {
         bytes32 bridgeHash = bridge.findHash(activeBridge);
 
-        Stargate memory stargate = Stargate(110, 1500000, 1, 1);
+        Stargate memory stargate = Stargate(110, 0, 1, 1);
         bytes memory data = abi.encode(stargate);
         BridgeParams memory bridgeParams = BridgeParams(activeBridgeAddress, data);
         bridge.setActiveBridge(bridgeHash, bridgeParams);

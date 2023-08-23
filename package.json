@@ -9,16 +9,20 @@
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy.js --network",
     "deploy:bridge": "npx hardhat run scripts/deployBridge.js --network",
-    "test:arbitrum": "forge test --match-path test/forge/chains/TestArbitrum.t.sol --fork-url https://rpc.ankr.com/arbitrum -vvv",
+    "deploy:proxy": "npx hardhat run scripts/deployProxyBridge.js --network",
+    "test:arbitrum": "forge test --match-path test/forge/chains/TestArbitrum.t.sol --fork-url https://rpc.ankr.com/arbitrum -vvvv",
     "test:base": "forge test --match-path test/forge/chains/TestBase.t.sol --fork-url https://developer-access-mainnet.base.org -vvv",
     "test:bnb": "forge test --match-path test/forge/chains/TestBnb.t.sol --fork-url https://binance.nodereal.io -vvv",
     "test:canto": "forge test --match-path test/forge/chains/TestCanto.t.sol --fork-url https://canto.slingshot.finance -vvv",
+    "test:cronos": "forge test --match-path test/forge/chains/TestCronos.t.sol --fork-url https://rpc.vvs.finance -vvv",
     "test:fantom": "forge test --match-path test/forge/chains/TestFantom.t.sol --fork-url https://rpc.ankr.com/fantom -vvv",
     "test:kava": "forge test --match-path test/forge/chains/TestKava.t.sol --fork-url https://evm2.kava.io -vvv",
-    "test:optimism": "forge test --match-path test/forge/chains/TestOptimism.t.sol --fork-url https://rpc.ankr.com/optimism -vvv",
+    "test:metis": "forge test --match-path test/forge/chains/TestMetis.t.sol --fork-url https://andromeda.metis.io/?owner=1088 -vvv",
+    "test:optimism": "forge test --match-path test/forge/chains/TestOptimism.t.sol --fork-url https://rpc.ankr.com/optimism -vvvv",
     "test:polygon": "forge test --match-path test/forge/chains/TestPolygon.t.sol --fork-url https://polygon-rpc.com -vvv",
     "test:zkevm": "forge test --match-path test/forge/chains/TestZkevm.t.sol --fork-url https://zkevm-rpc.com -vvv",
-    "test:zksync": "forge test --match-path test/forge/chains/TestZkSync.t.sol --fork-url https://mainnet.era.zksync.io -vvvv"
+    "test:zksync": "forge test --match-path test/forge/chains/TestZkSync.t.sol --fork-url https://mainnet.era.zksync.io -vvvv",
+    "verify": "npx hardhat verify"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
@@ -28,7 +32,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
     "@openzeppelin-4/contracts": "npm:@openzeppelin/contracts",
-    "@openzeppelin/contracts-upgradeable": "^4.8.3",
+    "@openzeppelin/contracts-upgradeable": "^4.9.3",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
     "@types/chai": "^4.2.0",
@@ -43,7 +47,9 @@
     "typescript": ">=4.5.0"
   },
   "dependencies": {
-    "blockchain-addressbook": "^0.43.76",
+    "@nomicfoundation/hardhat-verify": "^1.1.0",
+    "@openzeppelin/hardhat-upgrades": "^1.21.0",
+    "blockchain-addressbook": "^0.43.79",
     "forge-std": "^1.1.2",
     "solmate": "^6.1.0"
   }

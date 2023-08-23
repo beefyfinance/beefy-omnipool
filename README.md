@@ -13,23 +13,23 @@ https://docs.beefy.com
 
 ```shell
 ETH: None {HUB} Arbitrum: Circle -> ETH 
-Avalanche: Circle -> Arbitrum {HUB} 
-Polygon: Stargate -> Arbitrum (Needs axlUSDC - USDC swap) 
-Optimism: Stargate -> Abritrum 
-BNB: Stargate -> Arbitrum 
+Avalanche: Circle -> Arbitrum {HUB} -- done
+Polygon: Stargate -> Arbitrum (Needs axlUSDC - USDC swap)  -- done
+Optimism: Stargate -> Abritrum -- done
+BNB: Stargate -> Arbitrum -- done
 Celo: Axelar -> Polygon <Deprecated>
-Fantom: Axelar -> Polygon 
-Kava: Axelar -> Polygon 
-Cronos: Synapse -> Polygon 
-Canto: Synapse -> Polygon 
-Metis: Stargate -> Avax as USDT? 
-Moonbeam: Axelar -> Polygon 
+Fantom: Axelar -> Polygon -- done 
+Kava: Axelar -> Polygon -- done 
+Cronos: Synapse -> Polygon -- done
+Canto: Synapse -> Polygon -- done 
+Metis: Synapse -> Polygon -- done
+Moonbeam: Axelar -> Polygon ?
 Moonriver: ? 
 zkSync: zkBridge -> ETH 
 Fuse: ? 
 zkEVM: zkEVMBridge -> ETH 
 Aurora: Synapse -> Polygon <Deprecated>
-Base: Stargate -> Arbitrum
+Base: Stargate -> Arbitrum -- done
 ```
 
 ### Test

@@ -3,17 +3,18 @@ pragma solidity 0.8.19;
 import {Test, console} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
 import {BeefyRevenueBridge} from "../../../contracts/bridge/BeefyRevenueBridge.sol";
-import {BeefyRevenueBridgeStructs} from "../../../contracts/bridge/BeefyRevenueBridgeStructs.sol";
+import {Structs} from "../../../contracts/bridge/Structs.sol";
 import {ISolidlyRouter} from "../../../contracts/interfaces/swap/ISolidlyRouter.sol";
 import {Path} from "../../../contracts/utils/Path.sol";
 
-contract TestArbitrum is Test, BeefyRevenueBridgeStructs {
+contract TestArbitrum is Test, Structs {
     using Path for bytes;
 
     IERC20 constant stable = IERC20(0xaf88d065e77c8cC2239327C5EDb3A432268e5831);
     IERC20 constant native = IERC20(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
 
     BeefyRevenueBridge bridge;
+    Cowllector cowllector;
 
     address user = 0x161D61e30284A33Ab1ed227beDcac6014877B3DE;
     string activeBridge = "CIRCLE";
@@ -28,10 +29,12 @@ contract TestArbitrum is Test, BeefyRevenueBridgeStructs {
     }
 
     function initContract() public {
-        bridge.initialize(
-            stable, 
-            native
-        );
+        bridge.initialize();
+
+        bridge.setStable(stable, native);
+
+        cowllector = Cowllector(true, user, 5 ether);
+        bridge.setCowllector(cowllector);
 
         DestinationAddress memory destinationAddress = DestinationAddress(0x161D61e30284A33Ab1ed227beDcac6014877B3DE, "0x161D61e30284A33Ab1ed227beDcac6014877B3DE", "0x161D61e30284A33Ab1ed227beDcac6014877B3DE");
         bridge.setDestinationAddress(destinationAddress);
@@ -48,7 +51,6 @@ contract TestArbitrum is Test, BeefyRevenueBridgeStructs {
         
         vm.startPrank(user);
         deal(address(native), address(bridge), 10 ether);
-        uint256 bal = native.balanceOf(address(bridge));
         bridge.harvest();
         vm.stopPrank();
     }

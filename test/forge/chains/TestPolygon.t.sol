@@ -3,10 +3,10 @@ pragma solidity 0.8.19;
 import {Test, console} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
 import {BeefyRevenueBridge} from "../../../contracts/bridge/BeefyRevenueBridge.sol";
-import {BeefyRevenueBridgeStructs} from "../../../contracts/bridge/BeefyRevenueBridgeStructs.sol";
+import {Structs} from "../../../contracts/bridge/Structs.sol";
 import {Path} from "../../../contracts/utils/Path.sol";
 
-contract TestPolygon is Test, BeefyRevenueBridgeStructs {
+contract TestPolygon is Test, Structs {
     using Path for bytes;
 
     IERC20 constant stable = IERC20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174);
@@ -14,7 +14,7 @@ contract TestPolygon is Test, BeefyRevenueBridgeStructs {
 
     BeefyRevenueBridge bridge;
 
-    address user = 0x161D61e30284A33Ab1ed227beDcac6014877B3DE;
+    address user = 0x67e7A166a4a6CCE51436b45172f7457A023A9011;
     string activeBridge = "STARGATE";
     string swap = "UNISWAP_V3_DEADLINE";
     bytes32 activeSwap = keccak256(abi.encode(swap));
@@ -27,10 +27,9 @@ contract TestPolygon is Test, BeefyRevenueBridgeStructs {
     }
 
     function initContract() public {
-        bridge.initialize(
-            stable, 
-            native
-        );
+        bridge.initialize();
+
+        bridge.setStable(stable, native);
 
         DestinationAddress memory destinationAddress = DestinationAddress(0x161D61e30284A33Ab1ed227beDcac6014877B3DE, "0x161D61e30284A33Ab1ed227beDcac6014877B3DE", "0x161D61e30284A33Ab1ed227beDcac6014877B3DE");
         bridge.setDestinationAddress(destinationAddress);

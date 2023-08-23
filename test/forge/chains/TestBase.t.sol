@@ -3,11 +3,11 @@ pragma solidity 0.8.19;
 import {Test, console} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
 import {BeefyRevenueBridge} from "../../../contracts/bridge/BeefyRevenueBridge.sol";
-import {BeefyRevenueBridgeStructs} from "../../../contracts/bridge/BeefyRevenueBridgeStructs.sol";
+import {Structs} from "../../../contracts/bridge/Structs.sol";
 import {ISolidlyRouter} from "../../../contracts/interfaces/swap/ISolidlyRouter.sol";
 import {Path} from "../../../contracts/utils/Path.sol";
 
-contract TestBase is Test, BeefyRevenueBridgeStructs {
+contract TestBase is Test, Structs {
     using Path for bytes;
 
     IERC20 constant stable = IERC20(0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA);
@@ -28,10 +28,9 @@ contract TestBase is Test, BeefyRevenueBridgeStructs {
     }
 
     function initContract() public {
-        bridge.initialize(
-            stable, 
-            native
-        );
+        bridge.initialize();
+
+        bridge.setStable(stable, native);
 
         DestinationAddress memory destinationAddress = DestinationAddress(0x161D61e30284A33Ab1ed227beDcac6014877B3DE, "0x161D61e30284A33Ab1ed227beDcac6014877B3DE", "0x161D61e30284A33Ab1ed227beDcac6014877B3DE");
         bridge.setDestinationAddress(destinationAddress);

@@ -13,16 +13,17 @@ async function main() {
   const lockbox = "0x0000000000000000000000000000000000000000";
   const endpoint = "0x3c2269811836af69497E5F486A85D7316753cf62";
   const gasLimit = 2000000;
-  const Contract = await hre.ethers.getContractFactory("LayerZeroBridge");
-  const contract = await Contract.deploy(
+  const Contract = await hre.ethers.getContractFactory("BeefyRevenueBridge");
+  /*const contract = await Contract.deploy(
     bifi, 
     xBIFI, 
     lockbox, 
     gasLimit,
     endpoint
   );
+*/
 
- // const contract = await Contract.deploy();
+  const contract = await Contract.deploy();
 
   await contract.deployed();
 

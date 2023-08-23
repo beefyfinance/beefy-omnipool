@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-// Essential interfaces
+// Essential Interfaces
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin-4/contracts/token/ERC20/utils/SafeERC20.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {Address} from "@openzeppelin-4/contracts/utils/Address.sol";
 
 // Bridge Interfaces
@@ -15,7 +16,7 @@ import {ISynapse} from "../interfaces/bridge/ISynapse.sol";
 import {IzkEVM} from "../interfaces/bridge/IzkEVM.sol";
 import {IzkSync} from "../interfaces/bridge/IzkSync.sol";
 
-//Swap interfaces and utils
+//Swap Interfaces and Utils
 import {IUniswapRouterETH} from "../interfaces/swap/IUniswapRouterETH.sol";
 import {ISolidlyRouter} from "../interfaces/swap/ISolidlyRouter.sol";
 import {IBalancerVault} from "../interfaces/swap/IBalancerVault.sol";
@@ -24,12 +25,18 @@ import {Path} from '../utils/Path.sol';
 import {BeefyBalancerStructs} from "../utils/BeefyBalancerStructs.sol";
 import {BalancerActionsLib} from "../utils/BalancerActionsLib.sol";
 
-// Additional interfaces needed 
+// Additional Interfaces Needed 
 import {IWrappedNative} from "../interfaces/IWrappedNative.sol";
-import {BeefyRevenueBridgeStructs} from "./BeefyRevenueBridgeStructs.sol";
+import {Events} from "./Events.sol";
+import {Errors} from "./Errors.sol";
 
 // Beefy's revenue bridging system
-contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
+contract BeefyRevenueBridge is 
+    OwnableUpgradeable, 
+    UUPSUpgradeable, 
+    Events, 
+    Errors 
+{
     using SafeERC20 for IERC20;
     using Address for address;
     using Path for bytes;
@@ -40,49 +47,25 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     // Set our params
     bytes32 public activeBridge;
     bytes32 public activeSwap;
+    Cowllector public cowllector;
     BridgeParams public bridgeParams;
     SwapParams public swapParams;
     DestinationAddress public destinationAddress;
-
-    // Will be unused if we dont swap with balancer
-    IBalancerVault.SwapKind public swapKind = IBalancerVault.SwapKind.GIVEN_IN;
-    IBalancerVault.FundManagement public funds;
-
     uint256 public minBridgeAmount;
+    bool private init;
 
     // Mapping our enums to function string
     mapping(bytes32 => string) public bridgeToUse;
     mapping(bytes32 => string) public swapToUse;
-
-    /**@notice Revenue Bridge Events **/
-    event SetBridge(bytes32 bridge, BridgeParams params);
-    event SetSwap(bytes32 swap, SwapParams params);
-    event SetMinBridgeAmount(uint256 amount);
-    event SetDestinationAddress(DestinationAddress destinationAddress);
-    event SetStable(address oldStable, address newStable);
-    event Bridged();
-
-    /**@notice Errors */
-    error BridgeError();
-    error SwapError();
-    error NotAuthorized();
-    error IncorrectRoute();
-    error NotEnoughEth();
-    error FailedToSendEther();
-
-    function initialize(
-        IERC20 _stable,
-        IERC20 _native
-    ) external initializer {
+   
+    function initialize() external initializer {
         __Ownable_init();
-
-        stable = _stable;
-        native = _native;
 
         _initBridgeMapping();
         _initSwapMapping();
 
         funds = IBalancerVault.FundManagement(address(this), false, payable(address(this)), false);
+        swapKind = IBalancerVault.SwapKind.GIVEN_IN;
     }
 
     modifier onlyThis {
@@ -113,8 +96,11 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     }
 
     function harvest() external {
-        _bridge();
-        emit Bridged();
+        // We just wrap the native we have at the start. 
+        _wrapNative();
+        _sendCowllectorFunds();
+
+        if (_balanceOfNative() > 0) _bridge();
     }
 
     function _swap() private {
@@ -129,58 +115,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         );
     }
 
-    function wrapNative() external onlyOwner {
-        IWrappedNative(address(native)).deposit{value: address(this).balance}();
-    }
-
-     function inCaseTokensGetStuck(address _token, bool _native) external onlyOwner {
-        if (_native) {
-            uint256 _nativeAmount = address(this).balance;
-            (bool sent,) = msg.sender.call{value: _nativeAmount}("");
-            if(!sent) revert FailedToSendEther();
-        } else {
-            uint256 _amount = IERC20(_token).balanceOf(address(this));
-            IERC20(_token).safeTransfer(msg.sender, _amount);
-        }
-    }
-
-    function setActiveBridge(bytes32 _bridgeHash, BridgeParams calldata _params) external onlyOwner {
-        emit SetBridge(_bridgeHash, _params);
-
-        _removeApprovalIfNeeded(address(stable), bridgeParams.bridge);
-        
-        activeBridge = _bridgeHash;
-        bridgeParams = _params;
-
-        _approveTokenIfNeeded(address(stable), _params.bridge);
-    }
-
-    function setActiveSwap(bytes32 _swapHash, SwapParams calldata _params) external onlyOwner {
-        emit SetSwap(_swapHash, _params);
-        _removeApprovalIfNeeded(address(native), swapParams.router);
-        
-        activeSwap = _swapHash;
-        swapParams = _params;
-
-        _approveTokenIfNeeded(address(native), _params.router);
-    }  
-    
-    function setMinBridgeAmount(uint256 _amount) external onlyOwner {
-       emit SetMinBridgeAmount(_amount);
-       minBridgeAmount = _amount;
-    }
-
-    function setDestinationAddress(DestinationAddress calldata _destination) external onlyOwner {
-        emit SetDestinationAddress(_destination);
-        destinationAddress = _destination;
-    }
-
-    function setStable(IERC20 _stable) external onlyOwner {
-        emit SetStable(address(stable), address(_stable));
-        _removeApprovalIfNeeded(address(stable), bridgeParams.bridge);
-        stable = _stable;
-        _approveTokenIfNeeded(address(stable), bridgeParams.bridge);
-    }
+     
 
     /**@notice Bridge function called by this contract if it is the the activeBridge */
     function bridgeCircle() external onlyThis {
@@ -196,6 +131,8 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
                 address(stable)
             );
         }
+
+        emit Bridged(address(stable), bal);
     }
 
     function bridgeStargate() external onlyThis {
@@ -211,20 +148,22 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         _getGas(gasAmount);
         _swap();
         
-        uint256 stableBal = _balanceOfStable();
-        if (stableBal > minBridgeAmount) {
+        uint256 bal = _balanceOfStable();
+        if (bal > minBridgeAmount) {
             IStargate(bridgeParams.bridge).swap{ value: gasAmount }(
                 _params.dstChainId,
                 _params.srcPoolId,
                 _params.dstPoolId,
                 payable(address(this)),
-                stableBal,
+                bal,
                 0,
                 _lzTxObj,
                 destinationAddress.destinationBytes,
                 ""
             );
         }
+
+        emit Bridged(address(stable), bal);
     }
 
     function _stargateGasCost(uint16 _dstChainId, bytes memory _dstAddress, IStargate.lzTxObj memory _lzTxObj) private view returns (uint256 gasAmount) {
@@ -251,6 +190,8 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
                 bal
             );
         }
+
+        emit Bridged(address(stable), bal);
     }
 
     function bridgeSynapse() external onlyThis {
@@ -275,6 +216,8 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
                 block.timestamp + 1 hours
             );
         }
+
+        emit Bridged(address(stable), bal);
     }
 
     function bridgezkEVM() external onlyThis {
@@ -291,6 +234,8 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
                 ""
             );
         }
+
+        emit Bridged(address(stable), bal);
     }
 
     function bridgezkSync() external onlyThis {
@@ -304,6 +249,8 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
                 bal
             );
         }
+
+        emit Bridged(address(stable), bal);
     }
 
     /**@notice Swap functions */
@@ -376,7 +323,7 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
 
      function _balanceOfNative() private view returns (uint256) {
         return native.balanceOf(address(this));
-    }
+     }
 
     function findHash(string calldata _variable) external pure returns (bytes32) {
         return keccak256(abi.encode(_variable));
@@ -413,10 +360,39 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
         return route;
     }
 
+    function _sendCowllectorFunds() private {
+        if (cowllector.sendFunds) {
+            uint256 amountOnHand = address(cowllector.cowllector).balance + IERC20(native).balanceOf(cowllector.cowllector);
+            if (amountOnHand < cowllector.amountCowllectorNeeds) {
+                uint256 thisBal = _balanceOfNative();
+                uint256 amountToSend = cowllector.amountCowllectorNeeds - amountOnHand;
+                amountToSend = amountToSend > thisBal ? thisBal : amountToSend;
+                IERC20(native).safeTransfer(cowllector.cowllector, amountToSend);
+                emit CowllectorRefill(amountToSend);
+            }
+        }
+    }
+
     function _getGas(uint256 _gasAmount) private {
-        _gasAmount = _gasAmount - address(this).balance;
         uint256 nativeBal = _balanceOfNative();
-        if (nativeBal > _gasAmount) IWrappedNative(address(native)).withdraw(_gasAmount);
+        if (nativeBal >= _gasAmount) {
+            try IWrappedNative(address(native)).withdraw(_gasAmount) {
+                // Do nothing. Chains like Metis will fail this. 
+            } catch {
+                // Do nothing as well.
+            }
+        }
+    }
+
+    function _wrapNative() private {
+         uint256 bal = address(this).balance;
+         if (bal > 0) {
+            try IWrappedNative(address(native)).deposit{value: address(this).balance}() {
+                // Do nothing. Metis needs this try/catch.
+            } catch {
+                // Do nothing.
+            }
+         }
     }
 
     function _approveTokenIfNeeded(address token, address spender) private {
@@ -428,6 +404,69 @@ contract BeefyRevenueBridge is OwnableUpgradeable, BeefyRevenueBridgeStructs {
     function _removeApprovalIfNeeded(address token, address spender) private {
         if (IERC20(token).allowance(address(this), spender) > 0) {
             IERC20(token).safeApprove(spender, 0);
+        }
+    }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
+
+    // Setters
+    function setActiveBridge(bytes32 _bridgeHash, BridgeParams calldata _params) external onlyOwner {
+        emit SetBridge(_bridgeHash, _params);
+
+        _removeApprovalIfNeeded(address(stable), bridgeParams.bridge);
+        
+        activeBridge = _bridgeHash;
+        bridgeParams = _params;
+
+        _approveTokenIfNeeded(address(stable), _params.bridge);
+    }
+
+    function setActiveSwap(bytes32 _swapHash, SwapParams calldata _params) external onlyOwner {
+        emit SetSwap(_swapHash, _params);
+        _removeApprovalIfNeeded(address(native), swapParams.router);
+        
+        activeSwap = _swapHash;
+        swapParams = _params;
+
+        _approveTokenIfNeeded(address(native), _params.router);
+    } 
+
+    function setCowllector(Cowllector calldata _cowllector) external onlyOwner {
+        cowllector = _cowllector;
+    }
+
+    function setDestinationAddress(DestinationAddress calldata _destination) external onlyOwner {
+        emit SetDestinationAddress(_destination);
+        destinationAddress = _destination;
+    }
+    
+    function setMinBridgeAmount(uint256 _amount) external onlyOwner {
+       emit SetMinBridgeAmount(_amount);
+       minBridgeAmount = _amount;
+    }
+
+    function setStable(IERC20 _stable, IERC20 _native) external onlyOwner {
+        if (!init) {
+            stable = _stable;
+            native = _native;
+            init = true;
+            return;
+        }
+
+        emit SetStable(address(stable), address(_stable));
+        _removeApprovalIfNeeded(address(stable), bridgeParams.bridge);
+        stable = _stable;
+        _approveTokenIfNeeded(address(stable), bridgeParams.bridge);
+    }
+
+    function inCaseTokensGetStuck(address _token, bool _native) external onlyOwner {
+        if (_native) {
+            uint256 _nativeAmount = address(this).balance;
+            (bool sent,) = msg.sender.call{value: _nativeAmount}("");
+            if(!sent) revert FailedToSendEther();
+        } else {
+            uint256 _amount = IERC20(_token).balanceOf(address(this));
+            IERC20(_token).safeTransfer(msg.sender, _amount);
         }
     }
 
