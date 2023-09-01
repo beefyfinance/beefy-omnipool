@@ -72,7 +72,7 @@ contract OptimismBridgeAdapter is Initializable {
     }
 
     // Keep adapter interface. 
-    function bridgeCost(uint16, uint256, address) external pure returns (uint256 gasCost) {
+    function bridgeCost(uint256, uint256, address) external pure returns (uint256 gasCost) {
        return 0; // unused;
     }
 

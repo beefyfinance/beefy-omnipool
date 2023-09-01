@@ -67,12 +67,12 @@ contract LayerZeroBridge is NonblockingLzApp {
         emit BridgedOut(_dstChainId, msg.sender, _to, _amount);
     }
 
-    function bridgeCost(uint16 _dstChainId, uint256 _amount, address _to) external view returns (uint256 gasCost) {
+    function bridgeCost(uint256 _dstChainId, uint256 _amount, address _to) external view returns (uint256 gasCost) {
         bytes memory adapterParams = abi.encodePacked(version, gasLimit);
         bytes memory payload = abi.encode(_to, _amount);
         
         (gasCost,) = lzEndpoint.estimateFees(
-            _dstChainId,
+            chainIdToLzId[_dstChainId],
             address(this),
             payload,
             false,
