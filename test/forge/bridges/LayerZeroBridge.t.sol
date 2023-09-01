@@ -11,7 +11,7 @@ import {XERC20Lockbox} from "../../../contracts/bridgeToken/XERC20Lockbox.sol";
 import {IXERC20} from '../../../contracts/bridgeToken/interfaces/IXERC20.sol';
 import {IXERC20Lockbox} from '../../../contracts/bridgeToken/interfaces/IXERC20Lockbox.sol';
 
-contract OptimismBridgeTest is Test {
+contract LayerZeroBridgeTest is Test {
     address constant zero = 0x0000000000000000000000000000000000000000;
     address constant endpoint = 0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675;
     address constant user = 0x4fED5491693007f0CD49f4614FFC38Ab6A04B619;
