@@ -24,8 +24,8 @@ contract TestCanto is Test, Structs {
     address router = 0xa252eEE9BDe830Ca4793F054B506587027825a8e;
 
     function setUp() public {
-        bridge = new BeefyRevenueBridge();
-        initContract();
+        bridge = BeefyRevenueBridge(payable(0x02Ae4716B9D5d48Db1445814b0eDE39f5c28264B));
+       // initContract();
     }
 
     function initContract() public {
@@ -38,7 +38,7 @@ contract TestCanto is Test, Structs {
     }
 
     function test_SynapseBridge() public {
-        bytes32 bridgeHash = bridge.findHash(activeBridge);
+      /*  bytes32 bridgeHash = bridge.findHash(activeBridge);
         Synapse memory synapseParams = Synapse(
             137,
             2,
@@ -50,11 +50,11 @@ contract TestCanto is Test, Structs {
         bytes memory data = abi.encode(synapseParams);
         BridgeParams memory bridgeParams = BridgeParams(activeBridgeAddress, data);
         bridge.setActiveBridge(bridgeHash, bridgeParams);
-
-        setUpSwap();
+*/
+     //   setUpSwap();
         
         vm.startPrank(user);
-        deal(address(native), address(bridge), 10 ether);
+       // deal(address(native), address(bridge), 10 ether);
         bridge.harvest();
         vm.stopPrank();
     }

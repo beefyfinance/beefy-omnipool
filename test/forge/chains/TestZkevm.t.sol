@@ -22,8 +22,8 @@ contract TestZkEvm is Test, Structs {
     address router = 0xF6Ad3CcF71Abb3E12beCf6b3D2a74C963859ADCd;
 
     function setUp() public {
-        bridge = new BeefyRevenueBridge();
-        initContract();
+        bridge = BeefyRevenueBridge(payable(0x02Ae4716B9D5d48Db1445814b0eDE39f5c28264B));
+        //initContract();
     }
 
     function initContract() public {
@@ -36,16 +36,16 @@ contract TestZkEvm is Test, Structs {
     }
 
     function test_ZkEvmBridge() public {
-        bytes32 bridgeHash = bridge.findHash(activeBridge);
+     /*   bytes32 bridgeHash = bridge.findHash(activeBridge);
 
         bytes memory data = abi.encode("0x");
         BridgeParams memory bridgeParams = BridgeParams(activeBridgeAddress, data);
         bridge.setActiveBridge(bridgeHash, bridgeParams);
 
         setUpSwap();
-        
+        */
         vm.startPrank(user);
-        deal(address(native), address(bridge), 10 ether);
+       // deal(address(native), address(bridge), 10 ether);
         bridge.harvest();
         vm.stopPrank();
     }

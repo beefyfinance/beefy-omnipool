@@ -10,11 +10,10 @@ const bridgeAbi = require("../artifacts/contracts/bridge/BeefyRevenueBridge.sol/
 const deployerAbi = require("../artifacts/contracts/bridge/BeefyProxyDeployer.sol/BeefyProxyDeployer.json");
 const {
   tokens: {
-    ETH: { address: native },
+   ETH: { address: native },
     USDC: { address: stable },
   },
 } = addressBook.zkevm;
-
 
 const axelarParams = {
     chain: "Polygon",
@@ -30,8 +29,8 @@ const stargateParams = {
 
 const synapseParams = {
     chainId: 137,
-    tokenIndexTo: 2,
-    tokenIndexFrom: 0,
+    tokenIndexFrom: 2,
+    tokenIndexTo: 0,
     token: "0xD8836aF2e565D3Befce7D906Af63ee45a57E8f80",
     dstIndexFrom: 0,
     dstIndexTo: 2
@@ -46,19 +45,19 @@ const beefyBridgeProxySalt = "0xf8c6154b5e6d912f4d46dc26b1f505505221c75612b89027
 const path = ethers.utils.solidityPack(["address", "uint24", "address"], [native, 500, stable]);
 const route = [native, stable];
 const solidlyRoute = [[native, stable, false]];
-const bridgeAddress = "0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe";
+const bridgeAddress = "0x8671A0465844a15eb7230C5dd8d6032c26c655B7";
 const router = "0xF6Ad3CcF71Abb3E12beCf6b3D2a74C963859ADCd";
 
 
-const bridge = "zkEVM";
+const bridge = "SYNAPSE";
 const swap = "ALGEBRA";
 
-const deploy = true;
+const deploy = false;
 const deployProxyDeployer = false;
-const deployImpl = true;
+const deployImpl = false;
 
 const addBridge = true;
-const addSwap = true;
+const addSwap = false;
 
 let destinationAddress = "0xc9C61194682a3A5f56BF9Cd5B59EE63028aB6041";
 if (bridge == "STARGATE") destinationAddress = "0x5f98f630009E0E090965fb42DDe95F5A2d495445";
@@ -139,14 +138,14 @@ async function main() {
 
         if (bridge == "AXELAR") {
             let hash = await contract.findHash(bridge);
-            tx = await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["string", "string"], [axelarParams.chain, axelarParams.symbol])]);
+            tx = await contract.setActiveBridge(hash, [bridgeAddress, "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000007506f6c79676f6e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000761786c5553444300000000000000000000000000000000000000000000000000"]);
             await tx.wait();
             console.log(`Set bridge to ${bridge}`);
         }
 
         if (bridge == "zkEVM") {
             let hash = await contract.findHash(bridge);
-            tx = await contract.setActiveBridge(hash, [bridgeAddress, "0x"]);
+            tx = await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["address[]"], [route])]);
             await tx.wait();
             console.log(`Set bridge to ${bridge}`);
         }

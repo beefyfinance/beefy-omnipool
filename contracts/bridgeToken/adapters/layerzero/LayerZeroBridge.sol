@@ -18,8 +18,11 @@ contract LayerZeroBridge is NonblockingLzApp {
     uint16 private version = 1;
     uint256 public gasLimit;
 
-    event BridgedOut(uint16 indexed dstChainId, address indexed bridgeUser, address indexed tokenReceiver, uint256 amount);
-    event BridgedIn(uint16 indexed srcChainId, address indexed tokenReceiver, uint256 amount);
+    mapping (uint256 => uint16) public chainIdToLzId;
+    mapping (uint16 => uint256) public lzIdToChainId;
+
+    event BridgedOut(uint256 indexed dstChainId, address indexed bridgeUser, address indexed tokenReceiver, uint256 amount);
+    event BridgedIn(uint256 indexed srcChainId, address indexed tokenReceiver, uint256 amount);
 
     constructor(
         IERC20 _bifi,
@@ -39,7 +42,7 @@ contract LayerZeroBridge is NonblockingLzApp {
         
     }
 
-    function bridge(uint8 _dstChainId, uint256 _amount, address _to) external payable {
+    function bridge(uint256 _dstChainId, uint256 _amount, address _to) external payable {
         
         // Lock BIFI in lockbox and burn minted tokens. 
         if (address(lockbox) != address(0)) {
@@ -53,7 +56,7 @@ contract LayerZeroBridge is NonblockingLzApp {
         bytes memory payload = abi.encode(_to, _amount);
         
          _lzSend( // {value: messageFee} will be paid out of this contract!
-                _dstChainId, // destination chainId
+                chainIdToLzId[_dstChainId], // destination chainId
                 payload, // abi.encode()'ed bytes
                 payable(msg.sender), // (msg.sender will be this contract) refund address (LayerZero will refund any extra gas back to caller of send()
                 address(0x0), // future param, unused for this example
@@ -77,6 +80,13 @@ contract LayerZeroBridge is NonblockingLzApp {
         );
     }
 
+    function addChainIds(uint256[] calldata _chainIds, uint16[] calldata _lzIds) external onlyOwner {
+        for (uint i; i < _chainIds.length; ++i) {
+            chainIdToLzId[_chainIds[i]] = _lzIds[i];
+            lzIdToChainId[_lzIds[i]] = _chainIds[i];
+        }
+    }
+
     function _nonblockingLzReceive(
         uint16 _srcChainId,
         bytes memory /* _srcAddress */, 
@@ -91,7 +101,7 @@ contract LayerZeroBridge is NonblockingLzApp {
             BIFI.transfer(user, amount);
         } else IERC20(address(xBIFI)).transfer(user, amount); 
 
-        emit BridgedIn(_srcChainId, user, amount);      
+        emit BridgedIn(lzIdToChainId[_srcChainId], user, amount);      
     }
 
     function setGasLimit(uint256 _gasLimit) external onlyOwner {

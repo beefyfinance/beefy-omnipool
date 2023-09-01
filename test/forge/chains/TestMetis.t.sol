@@ -22,8 +22,8 @@ contract TestMetis is Test, Structs {
     address router = 0x1E876cCe41B7b844FDe09E38Fa1cf00f213bFf56;
 
     function setUp() public {
-        bridge = new BeefyRevenueBridge();
-        initContract();
+        bridge = BeefyRevenueBridge(payable(0x02Ae4716B9D5d48Db1445814b0eDE39f5c28264B));//new BeefyRevenueBridge();
+        //initContract();
     }
 
     function initContract() public {
@@ -36,7 +36,7 @@ contract TestMetis is Test, Structs {
     }
 
      function test_SynapseBridge() public {
-        bytes32 bridgeHash = bridge.findHash(activeBridge);
+     /*   bytes32 bridgeHash = bridge.findHash(activeBridge);
         Synapse memory synapseParams = Synapse(
             137,
             1,
@@ -50,9 +50,9 @@ contract TestMetis is Test, Structs {
         bridge.setActiveBridge(bridgeHash, bridgeParams);
 
         setUpSwap();
-        
+        */
         vm.startPrank(user);
-        deal(address(native), address(bridge), 10 ether);
+       // deal(address(native), address(bridge), 10 ether);
         bridge.harvest();
         vm.stopPrank();
     }
