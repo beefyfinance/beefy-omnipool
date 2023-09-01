@@ -1,5 +1,5 @@
 Arguments: 
-  /Users/weso/.nvm/versions/node/v16.19.0/bin/node /opt/homebrew/Cellar/yarn/1.22.19/libexec/bin/yarn.js add @nomicfoundation/hardhat-ethers, @nomicfoundation/hardhat-verify.
+  /Users/weso/.nvm/versions/node/v16.19.0/bin/node /opt/homebrew/Cellar/yarn/1.22.19/libexec/bin/yarn.js add @chainlink-ccip/contracts
 
 PATH: 
   /opt/homebrew/opt/jpeg/bin:/Users/weso/.nvm/versions/node/v16.19.0/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/opt/jpeg/bin:/Users/weso/.nvm/versions/node/v16.19.0/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/weso/.foundry/bin
@@ -14,7 +14,7 @@ Platform:
   darwin arm64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@nomicfoundation%2fhardhat-ethers,: Not found
+  Error: https://registry.yarnpkg.com/@chainlink-ccip%2fcontracts: Not found
       at Request.params.callback [as _callback] (/opt/homebrew/Cellar/yarn/1.22.19/libexec/lib/cli.js:66145:18)
       at Request.self.callback (/opt/homebrew/Cellar/yarn/1.22.19/libexec/lib/cli.js:140890:22)
       at Request.emit (node:events:513:28)
@@ -39,7 +39,7 @@ npm manifest:
       "deploy": "npx hardhat run scripts/deploy.js --network",
       "deploy:bridge": "npx hardhat run scripts/deployBridge.js --network",
       "deploy:proxy": "npx hardhat run scripts/deployProxyBridge.js --network",
-      "test:arbitrum": "forge test --match-path test/forge/chains/TestArbitrum.t.sol --fork-url https://rpc.ankr.com/arbitrum -vvv",
+      "test:arbitrum": "forge test --match-path test/forge/chains/TestArbitrum.t.sol --fork-url https://rpc.ankr.com/arbitrum -vvvv",
       "test:base": "forge test --match-path test/forge/chains/TestBase.t.sol --fork-url https://developer-access-mainnet.base.org -vvv",
       "test:bnb": "forge test --match-path test/forge/chains/TestBnb.t.sol --fork-url https://binance.nodereal.io -vvv",
       "test:canto": "forge test --match-path test/forge/chains/TestCanto.t.sol --fork-url https://canto.slingshot.finance -vvv",
@@ -51,6 +51,8 @@ npm manifest:
       "test:polygon": "forge test --match-path test/forge/chains/TestPolygon.t.sol --fork-url https://polygon-rpc.com -vvv",
       "test:zkevm": "forge test --match-path test/forge/chains/TestZkevm.t.sol --fork-url https://zkevm-rpc.com -vvv",
       "test:zksync": "forge test --match-path test/forge/chains/TestZkSync.t.sol --fork-url https://mainnet.era.zksync.io -vvvv",
+      "test:optimism:bridge": "forge test --match-path test/forge/bridges/OptimismBridge.t.sol --fork-url https://rpc.ankr.com/eth -vvv",
+      "test:layerzero:bridge": "forge test --match-path test/forge/bridges/LayerZeroBridge.t.sol --fork-url https://rpc.ankr.com/eth -vvv",
       "verify": "npx hardhat verify"
     },
     "devDependencies": {
@@ -76,8 +78,9 @@ npm manifest:
       "typescript": ">=4.5.0"
     },
     "dependencies": {
-      "@openzeppelin/hardhat-upgrades": "^2.2.1",
-      "blockchain-addressbook": "^0.43.76",
+      "@nomicfoundation/hardhat-verify": "^1.1.0",
+      "@openzeppelin/hardhat-upgrades": "^1.21.0",
+      "blockchain-addressbook": "^0.43.79",
       "forge-std": "^1.1.2",
       "solmate": "^6.1.0"
     }
@@ -733,6 +736,21 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-toolbox/-/hardhat-toolbox-2.0.2.tgz#ec95f23b53cb4e71a1a7091380fa223aad18f156"
     integrity sha512-vnN1AzxbvpSx9pfdRHbUzTRIXpMLPXnUlkW855VaDk6N1pwRaQ2gNzEmFAABk4lWf11E00PKwFd/q27HuwYrYg==
   
+  "@nomicfoundation/hardhat-verify@^1.1.0":
+    version "1.1.1"
+    resolved "https://registry.yarnpkg.com/@nomicfoundation/hardhat-verify/-/hardhat-verify-1.1.1.tgz#6a433d777ce0172d1f0edf7f2d3e1df14b3ecfc1"
+    integrity sha512-9QsTYD7pcZaQFEA3tBb/D/oCStYDiEVDN7Dxeo/4SCyHRSm86APypxxdOMEPlGmXsAvd+p1j/dTODcpxb8aztA==
+    dependencies:
+      "@ethersproject/abi" "^5.1.2"
+      "@ethersproject/address" "^5.0.2"
+      cbor "^8.1.0"
+      chalk "^2.4.2"
+      debug "^4.1.1"
+      lodash.clonedeep "^4.5.0"
+      semver "^6.3.0"
+      table "^6.8.0"
+      undici "^5.14.0"
+  
   "@nomicfoundation/solidity-analyzer-darwin-arm64@0.1.1":
     version "0.1.1"
     resolved "https://registry.yarnpkg.com/@nomicfoundation/solidity-analyzer-darwin-arm64/-/solidity-analyzer-darwin-arm64-0.1.1.tgz#4c858096b1c17fe58a474fe81b46815f93645c15"
@@ -830,18 +848,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.3.tgz#ff17a80fb945f5102571f8efecb5ce5915cc4811"
     integrity sha512-jjaHAVRMrE4UuZNfDwjlLGDxTHWIOwTJS2ldnc278a0gevfXfPr8hxKEVBGFBE96kl2G3VHDZhUimw/+G3TG2A==
   
-  "@openzeppelin/defender-admin-client@^1.48.0":
-    version "1.48.0"
-    resolved "https://registry.yarnpkg.com/@openzeppelin/defender-admin-client/-/defender-admin-client-1.48.0.tgz#acb8d6677a0b1bca463f9017aefaf4b6720123e1"
-    integrity sha512-MN29JD6jA3PgOxF2tG0aZbMIwOCieYWkK9UbHCq1UzGPrMgGV9NVMUyVdqpv7Ynplwsjp5ZTBDOyttwvTlchHg==
-    dependencies:
-      "@openzeppelin/defender-base-client" "1.48.0"
-      axios "^1.4.0"
-      ethers "^5.7.2"
-      lodash "^4.17.19"
-      node-fetch "^2.6.0"
-  
-  "@openzeppelin/defender-base-client@1.48.0", "@openzeppelin/defender-base-client@^1.48.0", "@openzeppelin/defender-base-client@^1.48.0-rc.1":
+  "@openzeppelin/defender-base-client@^1.46.0":
     version "1.48.0"
     resolved "https://registry.yarnpkg.com/@openzeppelin/defender-base-client/-/defender-base-client-1.48.0.tgz#9103b1b036db0451b52d7899a277bf24db4c4b06"
     integrity sha512-HFO87s010hRrMjyh2xYOCEAkLe21BfIbho7n5/kikA6A1ZgXi7MsEiqnQv1zP4bxMJgxGZ5b3t4tt6fWrakbag==
@@ -852,29 +859,26 @@ Lockfile:
       lodash "^4.17.19"
       node-fetch "^2.6.0"
   
-  "@openzeppelin/hardhat-upgrades@^2.2.1":
-    version "2.2.1"
-    resolved "https://registry.yarnpkg.com/@openzeppelin/hardhat-upgrades/-/hardhat-upgrades-2.2.1.tgz#75452c1fb507144b189da80e7d7e5654488705a4"
-    integrity sha512-Amlk2nhNpCfTCEovbqyarwBv4ZWmuiHHIcYfGy+FCSkkuSvQNVEJHoSl83Vgag+QhMtubdoggkYPqayxU46w1Q==
+  "@openzeppelin/hardhat-upgrades@^1.21.0":
+    version "1.28.0"
+    resolved "https://registry.yarnpkg.com/@openzeppelin/hardhat-upgrades/-/hardhat-upgrades-1.28.0.tgz#6361f313a8a879d8a08a5e395acf0933bc190950"
+    integrity sha512-7sb/Jf+X+uIufOBnmHR0FJVWuxEs2lpxjJnLNN6eCJCP8nD0v+Ot5lTOW2Qb/GFnh+fLvJtEkhkowz4ZQ57+zQ==
     dependencies:
-      "@openzeppelin/defender-admin-client" "^1.48.0"
-      "@openzeppelin/defender-base-client" "^1.48.0"
-      "@openzeppelin/platform-deploy-client" "^0.10.0"
+      "@openzeppelin/defender-base-client" "^1.46.0"
+      "@openzeppelin/platform-deploy-client" "^0.8.0"
       "@openzeppelin/upgrades-core" "^1.27.0"
       chalk "^4.1.0"
       debug "^4.1.1"
-      ethereumjs-util "^7.1.5"
       proper-lockfile "^4.1.1"
-      undici "^5.14.0"
   
-  "@openzeppelin/platform-deploy-client@^0.10.0":
-    version "0.10.0"
-    resolved "https://registry.yarnpkg.com/@openzeppelin/platform-deploy-client/-/platform-deploy-client-0.10.0.tgz#017599612ed3b898f94f281b378ac50626365617"
-    integrity sha512-jayQPeXqw4LnWIrNhNqgikJSre+n2NRrnEu76niSdVXc/faQkG3PmaHtRPJMFgsYxjjAiAfcMYyV95YBDuLexA==
+  "@openzeppelin/platform-deploy-client@^0.8.0":
+    version "0.8.0"
+    resolved "https://registry.yarnpkg.com/@openzeppelin/platform-deploy-client/-/platform-deploy-client-0.8.0.tgz#af6596275a19c283d6145f0128cc1247d18223c1"
+    integrity sha512-POx3AsnKwKSV/ZLOU/gheksj0Lq7Is1q2F3pKmcFjGZiibf+4kjGxr4eSMrT+2qgKYZQH1ZLQZ+SkbguD8fTvA==
     dependencies:
       "@ethersproject/abi" "^5.6.3"
-      "@openzeppelin/defender-base-client" "^1.48.0-rc.1"
-      axios "^1.4.0"
+      "@openzeppelin/defender-base-client" "^1.46.0"
+      axios "^0.21.2"
       lodash "^4.17.19"
       node-fetch "^2.6.0"
   
@@ -1461,6 +1465,13 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.12.0.tgz#ce1c9d143389679e253b314241ea9aa5cec980d3"
     integrity sha512-NmWvPnx0F1SfrQbYwOi7OeaNGokp9XhzNioJ/CSBs8Qa4vxug81mhJEAVZwxXuBmYB5KDRfMq/F3RR0BIU7sWg==
   
+  axios@^0.21.2:
+    version "0.21.4"
+    resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
+    integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
+    dependencies:
+      follow-redirects "^1.14.0"
+  
   axios@^1.4.0:
     version "1.4.0"
     resolved "https://registry.yarnpkg.com/axios/-/axios-1.4.0.tgz#38a7bf1224cd308de271146038b551d725f0be1f"
@@ -1514,10 +1525,10 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/blakejs/-/blakejs-1.2.1.tgz#5057e4206eadb4a97f7c0b6e197a505042fc3814"
     integrity sha512-QXUSXI3QVc/gJME0dBpXrag1kbzOqCjCX8/b54ntNyW6sjtoqxqRk3LTmXzaJoh71zMsDCjM+47jS7XiwN/+fQ==
   
-  blockchain-addressbook@^0.43.76:
-    version "0.43.76"
-    resolved "https://registry.yarnpkg.com/blockchain-addressbook/-/blockchain-addressbook-0.43.76.tgz#c88b3addfffeb1cbe9e56fd2b8b0f7c807a9a49d"
-    integrity sha512-GsiScCo31UT+/J9JgJCIlxljx3NoXNpB5H3cR9ayddfWtsugAnX/emVbQxY0KgmvqPw4ZZYxGvbtfnU8qrgj8Q==
+  blockchain-addressbook@^0.43.79:
+    version "0.43.79"
+    resolved "https://registry.yarnpkg.com/blockchain-addressbook/-/blockchain-addressbook-0.43.79.tgz#43ff9c506d93820abae94113259f1c75fe1747a0"
+    integrity sha512-U7gaCmvNIEIx/bshdCICH3+lNeWSr5eEi+E2ilkVUv+cNpbjiqJFzIt4mJSkr0cGnte5ILVk3N66PTNaeoXDZg==
   
   bn.js@4.11.6:
     version "4.11.6"
@@ -2321,7 +2332,7 @@ Lockfile:
       ethjs-util "0.1.6"
       rlp "^2.2.3"
   
-  ethereumjs-util@^7.0.3, ethereumjs-util@^7.1.0, ethereumjs-util@^7.1.4, ethereumjs-util@^7.1.5:
+  ethereumjs-util@^7.0.3, ethereumjs-util@^7.1.0, ethereumjs-util@^7.1.4:
     version "7.1.5"
     resolved "https://registry.yarnpkg.com/ethereumjs-util/-/ethereumjs-util-7.1.5.tgz#9ecf04861e4fbbeed7465ece5f23317ad1129181"
     integrity sha512-SDl5kKrQAudFBUe5OJM9Ac6WmMyYmXX/6sTmLZ3ffG2eY6ZIGBes3pEDxNN6V72WyOw4CPD5RomKdsa8DAAwLg==
@@ -2347,7 +2358,7 @@ Lockfile:
       uuid "2.0.1"
       xmlhttprequest "1.8.0"
   
-  ethers@^5.7.1, ethers@^5.7.2:
+  ethers@^5.7.1:
     version "5.7.2"
     resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.2.tgz#3a7deeabbb8c030d4126b24f84e525466145872e"
     integrity sha512-wswUsmWo1aOK8rR7DIKiWSw9DbLWe6x98Jrn8wcTflTVvaXhAMaB5zGAXy0GYQEQp9iO1iSHWVyARQm11zUtyg==
@@ -2513,7 +2524,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/flat/-/flat-5.0.2.tgz#8ca6fe332069ffa9d324c327198c598259ceb241"
     integrity sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==
   
-  follow-redirects@^1.12.1, follow-redirects@^1.15.0:
+  follow-redirects@^1.12.1, follow-redirects@^1.14.0, follow-redirects@^1.15.0:
     version "1.15.2"
     resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
     integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
@@ -3487,6 +3498,11 @@ Lockfile:
     version "4.3.0"
     resolved "https://registry.yarnpkg.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
     integrity sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==
+  
+  lodash.clonedeep@^4.5.0:
+    version "4.5.0"
+    resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
+    integrity sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==
   
   lodash.truncate@^4.4.2:
     version "4.4.2"
