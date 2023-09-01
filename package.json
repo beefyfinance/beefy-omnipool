@@ -23,6 +23,7 @@
     "test:zkevm": "forge test --match-path test/forge/chains/TestZkevm.t.sol --fork-url https://zkevm-rpc.com -vvv",
     "test:zksync": "forge test --match-path test/forge/chains/TestZkSync.t.sol --fork-url https://mainnet.era.zksync.io -vvvv",
     "test:optimism:bridge": "forge test --match-path test/forge/bridges/OptimismBridge.t.sol --fork-url https://rpc.ankr.com/eth -vvv",
+    "test:layerzero:bridge": "forge test --match-path test/forge/bridges/LayerZeroBridge.t.sol --fork-url https://rpc.ankr.com/eth -vvv",
     "verify": "npx hardhat verify"
   },
   "devDependencies": {
