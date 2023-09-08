@@ -93,6 +93,7 @@ contract LayerZeroBridgeTest is Test {
     }
 
      function test_bridge_out_with_permit() public {
+       // Wallet memory wallet = vm.createWallet();
         vm.startPrank(user);
         deal(address(bifi), user, 10 ether);
 
@@ -121,7 +122,7 @@ contract LayerZeroBridgeTest is Test {
 
         uint256 deadline = block.timestamp + 1000;
 
-        bridge.bridge{value: gasNeeded}(dstChainId, 10 ether, user, deadline, v, r, s);
+        bridge.bridge{value: gasNeeded}(user, dstChainId, 10 ether, user, deadline, v, r, s);
 
         uint256 lockboxBal = IERC20(address(bifi)).balanceOf(address(lockbox));
         uint256 userBal = IERC20(address(bifi)).balanceOf(user);

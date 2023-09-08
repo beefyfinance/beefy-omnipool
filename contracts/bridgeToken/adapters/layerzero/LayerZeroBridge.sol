@@ -56,6 +56,7 @@ contract LayerZeroBridge is NonblockingLzApp {
     }
 
     /**@notice  Bridge out funds with permit
+     * @param _user User address
      * @param _dstChainId Destination chain id 
      * @param _amount Amount of BIFI to bridge out
      * @param _to Address to receive funds on destination chain
@@ -64,9 +65,9 @@ contract LayerZeroBridge is NonblockingLzApp {
      * @param r r value for permit
      * @param s s value for permit
      */
-    function bridge(uint256 _dstChainId, uint256 _amount, address _to, uint256 _deadline, uint8 v, bytes32 r, bytes32 s) external payable {
-        IERC20Permit(address(BIFI)).permit(msg.sender, address(this), _amount, _deadline, v, r, s);
-        bridge(_dstChainId, _amount, _to);
+    function bridge(address _user, uint256 _dstChainId, uint256 _amount, address _to, uint256 _deadline, uint8 v, bytes32 r, bytes32 s) external payable {
+        IERC20Permit(address(BIFI)).permit(_user, address(this), _amount, _deadline, v, r, s);
+        _bridge(_user, _dstChainId, _amount, _to);
     }
 
     /**@notice Bridge Out Funds
@@ -74,14 +75,17 @@ contract LayerZeroBridge is NonblockingLzApp {
      * @param _amount Amount of BIFI to bridge out
      * @param _to Address to receive funds on destination chain
      */
-    function bridge(uint256 _dstChainId, uint256 _amount, address _to) public payable {
-        
+    function bridge(uint256 _dstChainId, uint256 _amount, address _to) external payable {
+        _bridge(msg.sender, _dstChainId, _amount, _to);
+    }
+
+    function _bridge(address _user, uint256 _dstChainId, uint256 _amount, address _to) private {
         // Lock BIFI in lockbox and burn minted tokens. 
         if (address(lockbox) != address(0)) {
-            BIFI.safeTransferFrom(msg.sender, address(this), _amount);
+            BIFI.safeTransferFrom(_user, address(this), _amount);
             lockbox.deposit(_amount);
             xBIFI.burn(address(this), _amount);
-        } else xBIFI.burn(msg.sender, _amount);
+        } else xBIFI.burn(_user, _amount);
 
         // Send message to receiving bridge to mint tokens to user. 
         bytes memory adapterParams = abi.encodePacked(version, gasLimit);
@@ -90,13 +94,13 @@ contract LayerZeroBridge is NonblockingLzApp {
          _lzSend( // {value: messageFee} will be paid out of this contract!
                 chainIdToLzId[_dstChainId], // destination chainId
                 payload, // abi.encode()'ed bytes
-                payable(msg.sender), // (msg.sender will be this contract) refund address (LayerZero will refund any extra gas back to caller of send()
+                payable(_user), // refund address (LayerZero will refund any extra gas back to caller of send()
                 address(0x0), // future param, unused for this example
                 adapterParams, // v1 adapterParams, specify custom destination gas qty
                 msg.value
         );
 
-        emit BridgedOut(_dstChainId, msg.sender, _to, _amount);
+        emit BridgedOut(_dstChainId, _user, _to, _amount);
     }
 
     /**@notice Estimate gas cost to bridge out funds
