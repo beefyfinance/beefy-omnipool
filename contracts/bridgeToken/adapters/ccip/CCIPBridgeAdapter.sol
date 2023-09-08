@@ -95,6 +95,7 @@ contract CCIPBridgeAdapter is OwnableUpgradeable {
 
     function _bridge(address _user, uint256 _dstChainId, uint256 _amount, address _to) private {
         if (!whitelistedChains[chainIdToCcipId[_dstChainId]]) revert InvalidChain();
+        
         // Lock BIFI in lockbox and burn minted tokens. 
         if (address(lockbox) != address(0)) {
             BIFI.safeTransferFrom(_user, address(this), _amount);

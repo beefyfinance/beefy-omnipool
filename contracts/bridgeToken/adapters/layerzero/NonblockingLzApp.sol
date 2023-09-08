@@ -13,7 +13,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 abstract contract NonblockingLzApp is LzApp {
     using ExcessivelySafeCall for address;
 
-    function __NonblockingLzAppInit(address _endpoint) public onlyInitializing {
+    function __NonblockingLzAppInit(address _endpoint) internal onlyInitializing {
         __LzAppInit(_endpoint);
     }
 
