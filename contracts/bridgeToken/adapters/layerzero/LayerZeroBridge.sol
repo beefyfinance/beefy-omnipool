@@ -42,6 +42,11 @@ contract LayerZeroBridge is NonblockingLzApp {
         
     }
 
+    /**@notice Bridge Out Funds
+     * @param _dstChainId Destination chain id 
+     * @param _amount Amount of BIFI to bridge out
+     * @param _to Address to receive funds on destination chain
+     */
     function bridge(uint256 _dstChainId, uint256 _amount, address _to) external payable {
         
         // Lock BIFI in lockbox and burn minted tokens. 
@@ -67,6 +72,11 @@ contract LayerZeroBridge is NonblockingLzApp {
         emit BridgedOut(_dstChainId, msg.sender, _to, _amount);
     }
 
+    /**@notice Estimate gas cost to bridge out funds
+     * @param _dstChainId Destination chain id 
+     * @param _amount Amount of BIFI to bridge out
+     * @param _to Address to receive funds on destination chain
+     */
     function bridgeCost(uint256 _dstChainId, uint256 _amount, address _to) external view returns (uint256 gasCost) {
         bytes memory adapterParams = abi.encodePacked(version, gasLimit);
         bytes memory payload = abi.encode(_to, _amount);
@@ -80,6 +90,10 @@ contract LayerZeroBridge is NonblockingLzApp {
         );
     }
 
+    /**@notice Add chain ids to the bridge
+     * @param _chainIds Chain ids to add
+     * @param _lzIds LayerZero ids to add
+     */
     function addChainIds(uint256[] calldata _chainIds, uint16[] calldata _lzIds) external onlyOwner {
         for (uint i; i < _chainIds.length; ++i) {
             chainIdToLzId[_chainIds[i]] = _lzIds[i];
