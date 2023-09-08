@@ -49,7 +49,8 @@ contract LayerZeroBridgeTest is Test {
             false
         );
 
-        bridge = new LayerZeroBridge(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), 2000000, endpoint);
+        bridge = new LayerZeroBridge();
+        bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), 2000000, endpoint);
         IXERC20(address(xbifi)).setLimits(address(bridge), mintAmount, mintAmount);
 
         chainIds.push(opId);

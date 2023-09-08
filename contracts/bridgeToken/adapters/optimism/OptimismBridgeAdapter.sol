@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0; 
+pragma solidity ^0.8.19; 
 
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin-4/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -8,6 +8,7 @@ import {IOptimismBridge} from "./IOptimismBridge.sol";
 import {IXERC20} from "../../interfaces/IXERC20.sol";
 import {IXERC20Lockbox} from "../../interfaces/IXERC20Lockbox.sol";
 
+// Optimism Token Bridge adapter for XERC20 tokens
 contract OptimismBridgeAdapter is Initializable {
     using SafeERC20 for IERC20;
     
@@ -18,11 +19,14 @@ contract OptimismBridgeAdapter is Initializable {
     IOptimismBridge public opBridge;
     uint32 public gasLimit;
 
+    // Events
     event BridgedOut(uint256 indexed dstChainId, address indexed bridgeUser, address indexed tokenReceiver, uint256 amount);
     event BridgedIn(uint256 indexed srcChainId, address indexed tokenReceiver, uint256 amount);
 
+    // Errors
     error WrongSender();
 
+    // Only allow bridge to call
     modifier onlyBridge {
         _onlyBridge();
         _;
@@ -33,6 +37,12 @@ contract OptimismBridgeAdapter is Initializable {
         if (opBridge.xDomainMessageSender() != address(this)) revert WrongSender();
     }
 
+    /**@notice Initialize the bridge
+     * @param _bifi BIFI token address
+     * @param _xbifi xBIFI token address
+     * @param _lockbox xBIFI lockbox address
+     * @param _bridge Optimism bridge address
+     */
     function initialize(
         IERC20 _bifi,
         IXERC20 _xbifi, 
@@ -50,6 +60,11 @@ contract OptimismBridgeAdapter is Initializable {
         }
     }
 
+    /**@notice Bridge Out Funds
+     * @param _dstChainId Destination chain id 
+     * @param _amount Amount of BIFI to bridge out
+     * @param _to Address to receive funds on destination chain
+     */
     function bridge(uint256 _dstChainId, uint256 _amount, address _to) external payable {
         
         // Lock BIFI in lockbox and burn minted tokens. 
@@ -71,11 +86,15 @@ contract OptimismBridgeAdapter is Initializable {
         emit BridgedOut(_dstChainId, msg.sender, _to, _amount);
     }
 
-    // Keep adapter interface. 
+    // Keep adapter interface. We only pay the tx gas for this bridge. 
     function bridgeCost(uint256, uint256, address) external pure returns (uint256 gasCost) {
        return 0; // unused;
     }
 
+    /**@notice Bridge In Funds, callable by Op Bridge
+     * @param _user Address to receive funds
+     * @param _amount Amount of BIFI to bridge in
+     */
     function mint(
         address _user,
         uint256 _amount

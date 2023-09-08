@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0; 
+pragma solidity ^0.8.19; 
 
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin-4/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -11,6 +11,7 @@ import {IAxelarGasService} from "@axelar-network/axelar-gmp-sdk-solidity/contrac
 import {StringToAddress} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/libs/AddressString.sol";
 import {AddressToString} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/libs/AddressString.sol";
 
+// Axelar Token Bridge adapter for XERC20 tokens
 contract AxelarBridge is OwnableUpgradeable {
     using SafeERC20 for IERC20;
     using StringToAddress for string;
@@ -40,6 +41,14 @@ contract AxelarBridge is OwnableUpgradeable {
     event BridgedOut(uint256 indexed dstChainId, address indexed bridgeUser, address indexed tokenReceiver, uint256 amount);
     event BridgedIn(uint256 indexed srcChainId, address indexed tokenReceiver, uint256 amount);
 
+    /**@notice Initialize the bridge
+     * @param _bifi BIFI token address
+     * @param _xbifi xBIFI token address
+     * @param _lockbox xBIFI lockbox address
+     * @param _gasLimit Gas limit for destination chain execution
+     * @param _gateway Axelar gateway address
+     * @param _gasService Axelar gas service address
+     */
     function initialize(
         IERC20 _bifi,
         IXERC20 _xbifi, 

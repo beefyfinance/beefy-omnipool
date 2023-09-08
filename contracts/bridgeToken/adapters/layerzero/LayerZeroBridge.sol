@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0; 
+pragma solidity ^0.8.19; 
 
-import "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin-4/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../../interfaces/IXERC20.sol";
-import "../../interfaces/IXERC20Lockbox.sol";
-import "./NonblockingLzApp.sol";
+import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
+import {SafeERC20} from  "@openzeppelin-4/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IXERC20} from "../../interfaces/IXERC20.sol";
+import {IXERC20Lockbox} from "../../interfaces/IXERC20Lockbox.sol";
+import  {NonblockingLzApp} from "./NonblockingLzApp.sol";
 
+// Lazyer Zero Token Bridge adapter for XERC20 tokens
 contract LayerZeroBridge is NonblockingLzApp {
     using SafeERC20 for IERC20;
     
@@ -15,22 +16,33 @@ contract LayerZeroBridge is NonblockingLzApp {
     IXERC20 public xBIFI;
     IXERC20Lockbox public lockbox;
 
+    // Bridge params
     uint16 private version = 1;
     uint256 public gasLimit;
 
+    // Chain id mappings
     mapping (uint256 => uint16) public chainIdToLzId;
     mapping (uint16 => uint256) public lzIdToChainId;
 
+    // Events
     event BridgedOut(uint256 indexed dstChainId, address indexed bridgeUser, address indexed tokenReceiver, uint256 amount);
     event BridgedIn(uint256 indexed srcChainId, address indexed tokenReceiver, uint256 amount);
 
-    constructor(
+    /**@notice Initialize the bridge
+     * @param _bifi BIFI token address
+     * @param _xbifi xBIFI token address
+     * @param _lockbox xBIFI lockbox address
+     * @param _gasLimit Gas limit for destination chain execution
+     * @param _endpoint LayerZero endpoint address
+     */
+    function initialize(
         IERC20 _bifi,
         IXERC20 _xbifi, 
         IXERC20Lockbox _lockbox,
         uint256 _gasLimit,
         address _endpoint
-    ) NonblockingLzApp(_endpoint) {
+    ) public initializer {
+        __NonblockingLzAppInit(_endpoint);
         BIFI = _bifi;
         xBIFI = _xbifi;
         lockbox = _lockbox;
@@ -108,7 +120,7 @@ contract LayerZeroBridge is NonblockingLzApp {
         bytes memory _payload
     ) internal override {
         (address user, uint256 amount) = abi.decode(_payload, (address,uint256));
-
+        
         xBIFI.mint(address(this), amount);
         if (address(lockbox) != address(0)) {
             lockbox.withdraw(amount);
@@ -118,6 +130,9 @@ contract LayerZeroBridge is NonblockingLzApp {
         emit BridgedIn(lzIdToChainId[_srcChainId], user, amount);      
     }
 
+    /**@notice Set gas limit for destination chain execution
+     * @param _gasLimit Gas limit for destination chain execution
+     */
     function setGasLimit(uint256 _gasLimit) external onlyOwner {
         gasLimit = _gasLimit;
     }

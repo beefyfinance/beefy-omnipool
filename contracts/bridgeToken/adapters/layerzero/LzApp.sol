@@ -1,23 +1,22 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-pragma solidity ^0.8.0;
-
-import "@openzeppelin-4/contracts/access/Ownable.sol";
-import "./interfaces/ILayerZeroReceiver.sol";
-import "./interfaces/ILayerZeroUserApplicationConfig.sol";
-import "./interfaces/ILayerZeroEndpoint.sol";
-import "./util/BytesLib.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ILayerZeroReceiver} from "./interfaces/ILayerZeroReceiver.sol";
+import {ILayerZeroUserApplicationConfig} from "./interfaces/ILayerZeroUserApplicationConfig.sol";
+import {ILayerZeroEndpoint} from "./interfaces/ILayerZeroEndpoint.sol";
+import {BytesLib} from "./util/BytesLib.sol";
 
 /*
  * a generic LzReceiver implementation
  */
-abstract contract LzApp is Ownable, ILayerZeroReceiver, ILayerZeroUserApplicationConfig {
+abstract contract LzApp is OwnableUpgradeable, ILayerZeroReceiver, ILayerZeroUserApplicationConfig {
     using BytesLib for bytes;
 
     // ua can not send payload larger than this by default, but it can be changed by the ua owner
     uint constant public DEFAULT_PAYLOAD_SIZE_LIMIT = 10000;
 
-    ILayerZeroEndpoint public immutable lzEndpoint;
+    ILayerZeroEndpoint public lzEndpoint;
     mapping(uint16 => bytes) public trustedRemoteLookup;
     mapping(uint16 => mapping(uint16 => uint)) public minDstGasLookup;
     mapping(uint16 => uint) public payloadSizeLimitLookup;
@@ -28,7 +27,8 @@ abstract contract LzApp is Ownable, ILayerZeroReceiver, ILayerZeroUserApplicatio
     event SetTrustedRemoteAddress(uint16 _remoteChainId, bytes _remoteAddress);
     event SetMinDstGas(uint16 _dstChainId, uint16 _type, uint _minDstGas);
 
-    constructor(address _endpoint) {
+    function __LzAppInit(address _endpoint) public onlyInitializing {
+        __Ownable_init();
         lzEndpoint = ILayerZeroEndpoint(_endpoint);
     }
 

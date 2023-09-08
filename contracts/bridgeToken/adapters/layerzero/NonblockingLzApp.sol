@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-pragma solidity ^0.8.0;
-
-import "./LzApp.sol";
-import "./util/ExcessivelySafeCall.sol";
+import {LzApp} from "./LzApp.sol";
+import {ExcessivelySafeCall} from "./util/ExcessivelySafeCall.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /*
  * the default LayerZero messaging behaviour is blocking, i.e. any failed message will block the channel
@@ -13,7 +13,9 @@ import "./util/ExcessivelySafeCall.sol";
 abstract contract NonblockingLzApp is LzApp {
     using ExcessivelySafeCall for address;
 
-    constructor(address _endpoint) LzApp(_endpoint) {}
+    function __NonblockingLzAppInit(address _endpoint) public onlyInitializing {
+        __LzAppInit(_endpoint);
+    }
 
     mapping(uint16 => mapping(bytes => mapping(uint64 => bytes32))) public failedMessages;
 
