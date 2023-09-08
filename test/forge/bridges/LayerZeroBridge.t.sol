@@ -2,6 +2,8 @@ pragma solidity 0.8.19;
 
 import {Test, console} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
+import {IERC20Permit} from "@openzeppelin-4/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import {ECDSA} from "@openzeppelin-4/contracts/utils/cryptography/ECDSA.sol";
 import {LayerZeroBridge} from "../../../contracts/bridgeToken/adapters/layerzero/LayerZeroBridge.sol";
 import {IOptimismBridge} from "../../../contracts/bridgeToken/adapters/optimism/IOptimismBridge.sol";
 import {BIFI} from "../../../contracts/bridgeToken/BIFI.sol";
@@ -12,6 +14,8 @@ import {IXERC20} from '../../../contracts/bridgeToken/interfaces/IXERC20.sol';
 import {IXERC20Lockbox} from '../../../contracts/bridgeToken/interfaces/IXERC20Lockbox.sol';
 
 contract LayerZeroBridgeTest is Test {
+    using ECDSA for bytes32;
+
     address constant zero = 0x0000000000000000000000000000000000000000;
     address constant endpoint = 0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675;
     address constant user = 0x4fED5491693007f0CD49f4614FFC38Ab6A04B619;
@@ -30,7 +34,10 @@ contract LayerZeroBridgeTest is Test {
     uint256[] chainIds;
     uint16[] lzIds;
 
+    uint256 signerPk;
+
      function setUp() public {
+        signerPk = 87;
         mintAmounts.push(mintAmount);
         zeros.push(zero);
         bifi = new BIFI();
@@ -73,6 +80,48 @@ contract LayerZeroBridgeTest is Test {
         uint256 gasNeeded = bridge.bridgeCost(dstChainId, 10 ether, user);
 
         bridge.bridge{value: gasNeeded}(dstChainId, 10 ether, user);
+
+        uint256 lockboxBal = IERC20(address(bifi)).balanceOf(address(lockbox));
+        uint256 userBal = IERC20(address(bifi)).balanceOf(user);
+        uint256 xbifiBal = IERC20(address(xbifi)).totalSupply();
+
+        assertEq(lockboxBal, 10 ether);
+        assertEq(userBal, 0);
+        assertEq(xbifiBal, 0);
+
+        vm.stopPrank();
+    }
+
+     function test_bridge_out_with_permit() public {
+        vm.startPrank(user);
+        deal(address(bifi), user, 10 ether);
+
+        uint256 dstChainId = 10;
+        uint16 lzId = bridge.chainIdToLzId(dstChainId);
+
+        assertEq(lzId, lzOpId);
+
+        uint256 gasNeeded = bridge.bridgeCost(dstChainId, 10 ether, user);
+
+        bytes32 typehash = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+        uint256 nonce = IERC20Permit(address(bifi)).nonces(user);
+
+        bytes32 DOMAIN_SEPARATOR = IERC20Permit(address(bifi)).DOMAIN_SEPARATOR();
+        bytes32 digest = keccak256(abi.encode(
+                        typehash,
+                        user,
+                        address(bridge),
+                        uint256(10 ether),
+                        nonce,
+                        uint256(block.timestamp + 1000)));
+
+        bytes32 withDomain = ECDSA.toTypedDataHash(DOMAIN_SEPARATOR, digest);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, withDomain);
+
+        uint256 deadline = block.timestamp + 1000;
+
+        bridge.bridge{value: gasNeeded}(dstChainId, 10 ether, user, deadline, v, r, s);
 
         uint256 lockboxBal = IERC20(address(bifi)).balanceOf(address(lockbox));
         uint256 userBal = IERC20(address(bifi)).balanceOf(user);

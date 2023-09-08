@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19; 
 
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
+import {IERC20Permit} from "@openzeppelin-4/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 import {SafeERC20} from  "@openzeppelin-4/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IXERC20} from "../../interfaces/IXERC20.sol";
 import {IXERC20Lockbox} from "../../interfaces/IXERC20Lockbox.sol";
@@ -54,12 +55,26 @@ contract LayerZeroBridge is NonblockingLzApp {
         
     }
 
+    /**@notice  Bridge out funds with permit
+     * @param _dstChainId Destination chain id 
+     * @param _amount Amount of BIFI to bridge out
+     * @param _to Address to receive funds on destination chain
+     * @param _deadline Deadline for permit
+     * @param v v value for permit
+     * @param r r value for permit
+     * @param s s value for permit
+     */
+    function bridge(uint256 _dstChainId, uint256 _amount, address _to, uint256 _deadline, uint8 v, bytes32 r, bytes32 s) external payable {
+        IERC20Permit(address(BIFI)).permit(msg.sender, address(this), _amount, _deadline, v, r, s);
+        bridge(_dstChainId, _amount, _to);
+    }
+
     /**@notice Bridge Out Funds
      * @param _dstChainId Destination chain id 
      * @param _amount Amount of BIFI to bridge out
      * @param _to Address to receive funds on destination chain
      */
-    function bridge(uint256 _dstChainId, uint256 _amount, address _to) external payable {
+    function bridge(uint256 _dstChainId, uint256 _amount, address _to) public payable {
         
         // Lock BIFI in lockbox and burn minted tokens. 
         if (address(lockbox) != address(0)) {
