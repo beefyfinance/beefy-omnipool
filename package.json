@@ -5,6 +5,10 @@
   "main": "index.js",
   "author": "Beefy",
   "license": "MIT",
+  "engines": {
+      "node": "18.x",
+      "yarn": "1.x"
+  },
   "scripts": {
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy.js --network",
