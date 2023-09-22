@@ -1,0 +1,15 @@
+{
+    "solidity.remappings": [
+        "ds-test/=lib/forge-std/lib/ds-test/src/",
+        "@chainlink/=node_modules/@chainlink/",
+        "@ensdomains/=node_modules/@ensdomains/",
+        "@gelatonetwork/=node_modules/@gelatonetwork/",
+        "@openzeppelin/=node_modules/@openzeppelin/",
+        "@uniswap/=node_modules/@uniswap/",
+        "@axelar-network/=node_modules/@axelar-network/",
+        "base64-sol/=node_modules/base64-sol/",
+        "eth-gas-reporter/=node_modules/eth-gas-reporter/",
+        "forge-std/=node_modules/forge-std/",
+        "lib/forge-std:ds-test/=lib/forge-std/lib/ds-test/src/",
+    ]
+}
