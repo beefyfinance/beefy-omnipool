@@ -5,6 +5,7 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const hre = require("hardhat");
+const BigNumber = require("bignumber.js");
 
 const axelarAbi = require("../artifacts/contracts/bridgeToken/adapters/axelar/AxelarBridge.sol/AxelarBridge.json");
 const optimismAbi= require("../artifacts/contracts/bridgeToken/adapters/optimism/OptimismBridgeAdapter.sol/OptimismBridgeAdapter.json");
@@ -18,17 +19,18 @@ async function main() {
   const beefyContractDeployerAbi = ["function deploy(bytes32 _salt, bytes memory _bytecode) external returns (address)"];
  
   // Salts for bridge deployments
-  const layerZeroSalt = "0x33ca404c0efdcc5d177f46b95308c329849a2245e3aa8b603c435caca0c3b0c8";
-  const optimismSalt = "0xb9d002dc0ef3fe6ad261547d71d0835cc059d8df85b02e127b1909564e82ef0c";
-  const axelarSalt = "0xf1aa7215c3c549a12fe696ef8cfa7014c78ac7750b0c43cd631e32d149f2d80f";
-  const ccipSalt = "0x973f05b98134c232372b0b15b96f8d1928e87c937d3506d2b1cb9972967893fc";
+  const layerZeroSalt = "0x6f8f870c622c865d5a8f260cfe1f931ebcba17b57b1380e457db5445268cfe32";
+  const optimismSalt = "0xc15f1de73673ddc4bcd3eda396774c1c8aeada81004436efd312f93a7b6875ab";
+  const axelarSalt = "0x791782a92c3628b9fdcf7182b854f2423b26da720a82f495c693438420d0f3e3";
+  const ccipSalt = "0x794be46e0fea1a6073d4536f084685c651ddcde4082d7243a21f6afa0bf21a79";
 
   const lazerZeroArgs = {
-    gasLimit: 1500000,
+    gasLimit: 300000,
     endpoint: "0x3c2269811836af69497E5F486A85D7316753cf62",
   }
 
   const optimismArgs = {
+    //bridge: "0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1"
     bridge: "0x4200000000000000000000000000000000000007",
   }
 
@@ -37,7 +39,7 @@ async function main() {
   }
 
   const axelarArgs = {
-    gasLimit: 1500000,  
+    //gasLimit: 300000,  
     gateway: "0xe432150cce91c13a887f7D836923d5597adD8E31",
     gasService: "0x2d5d7d31F671F86C782533cc367F14109a082712"
   }
@@ -52,21 +54,32 @@ async function main() {
   const token = await Token.deploy();
   await token.deployed();
 
+  let tx = await token.initialize("0x161D61e30284A33Ab1ed227beDcac6014877B3DE");
+  await tx.wait();
+
   console.log("BIFI deployed to:", token.address);
 
-  const xToken = await factory.callStatic.deployXERC20("xTest", "xTest", [], [], []);
-  let tx = await factory.deployXERC20("xTest", "xTest", [], [], []);
+  const xToken = await factory.callStatic.deployXERC20("Test", "Test", [], [], []);
+  tx = await factory.deployXERC20("Test", "Test", [], [], []);
   await tx.wait();
 
   console.log("xToken deployed to:", xToken);
 
-  const lockbox = ethers.constants.AddressZero;
+
+ //const lockbox = ethers.constants.AddressZero;
   const lockbox = await factory.callStatic.deployLockbox(xToken, token.address, false);
   tx = await factory.deployLockbox(xToken, token.address, false);
   await tx.wait();
 
   console.log("lockbox deployed to:", lockbox);
+/*
+  const xToken = "0x665E21ce21B1e7c7401647c1fb740981b270b71d";
+  const token = {
+    address: xToken
+  }
 
+  const lockbox = ethers.constants.AddressZero;
+*/
   const deployer = await hre.ethers.getContractAt(beefyContractDeployerAbi, contractDeployer);
   const axelarBridge = await deployer.callStatic.deploy(axelarSalt, axelarAbi.bytecode);
   tx = await deployer.deploy(axelarSalt, axelarAbi.bytecode);
@@ -93,7 +106,7 @@ async function main() {
   console.log("LazerZero Bridge deployed to:", lazerZeroBridge);
 
   const axelarBridgeContract = await hre.ethers.getContractAt(axelarAbi.abi, axelarBridge);
-  tx = await axelarBridgeContract.initialize(token.address, xToken, lockbox, axelarArgs.gasLimit, axelarArgs.gateway, axelarArgs.gasService);
+  tx = await axelarBridgeContract.initialize(token.address, xToken, lockbox, axelarArgs.gateway, axelarArgs.gasService);
   await tx.wait();
 
   console.log("Axelar Bridge initialized");
@@ -102,8 +115,6 @@ async function main() {
   tx = await optimismBridgeContract.initialize(token.address, xToken, lockbox, optimismArgs.bridge);
   await tx.wait();
 
-  console.log("Optimism Bridge initialized");
-
   const ccipBridgeContract = await hre.ethers.getContractAt(ccipAbi.abi, ccipBridge);
   tx = await ccipBridgeContract.initialize(token.address, xToken, lockbox, ccipArgs.router);
   await tx.wait();
@@ -111,7 +122,7 @@ async function main() {
   console.log("CCIP Bridge initialized");
 
   const lazerZeroBridgeContract = await hre.ethers.getContractAt(lazerZeroAbi.abi, lazerZeroBridge);
- tx = await lazerZeroBridgeContract.initialize(token.address, xToken, lockbox, lazerZeroArgs.gasLimit, lazerZeroArgs.endpoint);
+  tx = await lazerZeroBridgeContract.initialize(token.address, xToken, lockbox, lazerZeroArgs.gasLimit, lazerZeroArgs.endpoint);
   await tx.wait();
 
   console.log("LazerZero Bridge initialized");
@@ -139,22 +150,26 @@ async function main() {
 
   console.log("LazerZero Limits set");
 
- let tx = await axelarBridgeContract.addChainIds([1], ["Ethereum"]);
+  tx = await axelarBridgeContract.addChainIds([1, 42161], ["Ethereum", "arbitrum"]);
   tx = await tx.wait();
 
   console.log("Axelar Chain Ids added");
 
-  tx = await ccipBridgeContract.setChainIds([1], [BigInt(5009297550715157269)]);
+
+  tx = await ccipBridgeContract.setChainIds([1], [BigInt("5009297550715157269")]);
   tx = await tx.wait();
 
   console.log("CCIP Chain Ids added");
 
-  tx = await lazerZeroBridgeContract.addChainIds([1], [111]);
+  tx = await lazerZeroBridgeContract.addChainIds([1, 10], [101, 111]);  
   tx = await tx.wait();
 
   console.log("LazerZero Chain Ids added");
 
-  tx = await lazerZeroBridgeContract.setTrustedRemote(101, lazerZeroBridge);
+  tx = await lazerZeroBridgeContract.setTrustedRemoteAddress(101, lazerZeroBridge);
+  await tx.wait();
+
+  tx = await lazerZeroBridgeContract.setTrustedRemoteAddress(111, lazerZeroBridge);
   await tx.wait();
 
   console.log("LazerZero Trusted Remote set");

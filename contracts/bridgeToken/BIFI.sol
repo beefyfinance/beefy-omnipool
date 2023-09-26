@@ -7,7 +7,7 @@ import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/
 contract BIFI is ERC20Upgradeable, ERC20PermitUpgradeable {
     
     function initialize(address _treasury) external initializer {
-        __ERC20_init("Beefy", "BIFI");
+        __ERC20_init("mooTest", "mooTest");
         __ERC20Permit_init("Beefy");
         _mint(_treasury, 80_000 ether);
     }

@@ -26,6 +26,7 @@ contract CCIPBridgeTest is Test {
     address lockbox;
     XERC20Factory factory;
     CCIPBridgeAdapter bridge;
+    address[] contracts;
 
     bytes4 public constant EVM_EXTRA_ARGS_V1_TAG = 0x97a657c9;
 
@@ -61,8 +62,9 @@ contract CCIPBridgeTest is Test {
             false
         );
 
+        contracts.push(address(router));
         bridge = new CCIPBridgeAdapter();
-        bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), IRouterClient(router));
+        bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), contracts);
         IXERC20(address(xbifi)).setLimits(address(bridge), mintAmount, mintAmount);
 
         chainIds.push(opId);

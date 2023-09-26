@@ -18,12 +18,13 @@ contract LayerZeroBridgeTest is Test {
 
     address constant zero = 0x0000000000000000000000000000000000000000;
     address constant endpoint = 0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675;
-    address constant user = 0x4fED5491693007f0CD49f4614FFC38Ab6A04B619;
+    address constant user = 0x810362e802692882720118616189A4361351c6f6;
     BIFI bifi;
     address xbifi;
     address lockbox;
     XERC20Factory factory;
     LayerZeroBridge bridge;
+    address[] contracts;
 
     address[] zeros;
     uint256[] mintAmounts;
@@ -37,7 +38,9 @@ contract LayerZeroBridgeTest is Test {
     uint256 signerPk;
 
      function setUp() public {
-        signerPk = 87;
+
+        // Just a test PK no live funds on this address
+        signerPk = 0x951388a043b3665bed42537db0ae3745b36023af86a8f1cd185d269fb44667f7;
         mintAmounts.push(mintAmount);
         zeros.push(zero);
         bifi = new BIFI();
@@ -56,14 +59,17 @@ contract LayerZeroBridgeTest is Test {
             false
         );
 
+        contracts.push(address(endpoint));
         bridge = new LayerZeroBridge();
-        bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), 2000000, endpoint);
+        bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), contracts);
         IXERC20(address(xbifi)).setLimits(address(bridge), mintAmount, mintAmount);
 
         chainIds.push(opId);
         lzIds.push(lzOpId);
         bridge.addChainIds(chainIds, lzIds);
         bridge.setTrustedRemoteAddress(lzOpId, abi.encodePacked(address(bridge)));
+        bridge.setGasLimit(2000000);
+        vm.deal(user, 1 ether);
     }
 
     function test_bridge_out() public {

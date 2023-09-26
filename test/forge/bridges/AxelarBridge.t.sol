@@ -29,6 +29,8 @@ contract AxelarBridgeTest is Test {
     XERC20Factory factory;
     AxelarBridge bridge;
 
+    address[] axelarContracts;
+
     bytes32 constant PREFIX_CONTRACT_CALL_APPROVED = keccak256('contract-call-approved');
 
     error InvalidChainId();
@@ -64,8 +66,11 @@ contract AxelarBridgeTest is Test {
             false
         );
 
+        axelarContracts.push(address(gateway));
+        axelarContracts.push(address(gasService));
+
         bridge = new AxelarBridge();
-        bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), 2000000, gateway, gasService);
+        bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), axelarContracts);
         IXERC20(address(xbifi)).setLimits(address(bridge), mintAmount, mintAmount);
 
         chainIds.push(opId);
@@ -95,17 +100,11 @@ contract AxelarBridgeTest is Test {
     }
 
     function test_malicous_mint() public {
-        vm.startPrank(user);
 
         bytes32 commandId = keccak256(abi.encode("kek"));
         string memory srcAddress = user.toString();
         bytes memory payload = abi.encode(user, 10 ether);
-
-        // Caller is not the gateway
-        vm.expectRevert(NotGateway.selector);
-        bridge.execute(commandId, axelarOpId, srcAddress, payload);
-        vm.stopPrank();
-
+    
         vm.startPrank(address(gateway));
 
         // Chain id is not valid

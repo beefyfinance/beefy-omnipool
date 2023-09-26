@@ -21,6 +21,7 @@ contract OptimismBridgeTest is Test {
     address lockbox;
     XERC20Factory factory;
     OptimismBridgeAdapter bridge;
+    address[] contracts;
 
     error WrongSender();
 
@@ -47,8 +48,9 @@ contract OptimismBridgeTest is Test {
             false
         );
 
+        contracts.push(address(opbridge));
         bridge = new OptimismBridgeAdapter();
-        bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), IOptimismBridge(opbridge));
+        bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), contracts);
         IXERC20(address(xbifi)).setLimits(address(bridge), mintAmount, mintAmount);
     }
 
