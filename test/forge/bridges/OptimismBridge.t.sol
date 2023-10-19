@@ -24,10 +24,11 @@ contract OptimismBridgeTest is Test {
     address[] contracts;
 
     error WrongSender();
+    error NoErrorFound();
 
     address[] zeros;
     uint256[] mintAmounts;
-    uint256 mintAmount = 80000 ether;
+    uint256 mintAmount = 1000 ether;
 
      function setUp() public {
         mintAmounts.push(mintAmount);
@@ -104,6 +105,44 @@ contract OptimismBridgeTest is Test {
         assertEq(lockboxBal, 0);
         assertEq(userBal, 10 ether);
         assertEq(xbifiBal, 0);
+
+        vm.stopPrank();
+    }
+
+    function test_retryBridge() public {
+        vm.startPrank(address(opbridge));
+
+        deal(address(bifi), lockbox, 2000 ether);
+
+        // Store this address as the variable in the xDomainMessanger slot on the opBridge.
+        bytes32 bridgeBytes = bytes32(uint256(uint160(address(bridge))));
+        vm.store(address(opbridge), 0x00000000000000000000000000000000000000000000000000000000000000cc, bridgeBytes);
+        address sender = IOptimismBridge(opbridge).xDomainMessageSender();
+        assertEq(sender, address(bridge));
+
+        uint256 approvalAmount = IERC20(address(xbifi)).allowance(address(bridge), address(lockbox));
+        assertEq(approvalAmount, type(uint256).max);
+
+        // User should get their first 1000 tokens.
+        bridge.mint(user, 1000 ether);
+
+        uint256 amt = IERC20(address(bifi)).balanceOf(user);
+
+        assertEq(amt, 1000 ether);
+
+        bridge.mint(user, 10 ether);
+
+        amt = IERC20(address(bifi)).balanceOf(user);    
+        assertEq(amt, 1000 ether);
+
+        skip(1 days);
+        bridge.retry(0);
+
+        amt = IERC20(address(bifi)).balanceOf(user);
+        assertEq(amt, 1010 ether);
+
+        vm.expectRevert(NoErrorFound.selector);
+        bridge.retry(0);
 
         vm.stopPrank();
     }

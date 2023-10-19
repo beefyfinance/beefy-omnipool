@@ -38,7 +38,7 @@ module.exports = {
       url: "https://polygon.llamarpc.com",
       chainId: 137,
       accounts,
-      gasPrice: 300000000000
+      //gasPrice: 300000000000
     },
     fantom: {
       url: process.env.FANTOM_RPC || "https://rpc.ankr.com/fantom",

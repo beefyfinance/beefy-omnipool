@@ -61,6 +61,7 @@ contract CCIPBridgeAdapter is BeefyBridgeAdapter {
 
         if (address(lockbox) != address(0)) {
             BIFI.safeApprove(address(lockbox), type(uint).max);
+            IERC20(address(xBIFI)).safeApprove(address(lockbox), type(uint).max);
         }
         
     }
@@ -124,9 +125,7 @@ contract CCIPBridgeAdapter is BeefyBridgeAdapter {
         if (abi.decode(message.sender, (address)) != address(this)) revert WrongSourceAddress();
         (address _user, uint256 _amount) = abi.decode(message.data, (address,uint256));
 
-        _bridgeIn(_user, _amount);
-
-        emit BridgedIn(ccipIdToChainId[message.sourceChainSelector], _user, _amount);      
+        _bridgeIn(ccipIdToChainId[message.sourceChainSelector], _user, _amount);   
     }
 
     /**@notice Set extra args (gasLimit) for bridge messages

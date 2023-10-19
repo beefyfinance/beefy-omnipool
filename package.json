@@ -12,6 +12,7 @@
   "scripts": {
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy.js --network",
+    "setCowllector": "npx hardhat run scripts/setCowllector.js --network",
     "deploy:bridge": "npx hardhat run scripts/deployBridge.js --network",
     "deploy:proxy": "npx hardhat run scripts/deployProxyBridge.js --network",
     "deploy:tokenBridge": "npx hardhat run scripts/deployTokenBridge.js --network",

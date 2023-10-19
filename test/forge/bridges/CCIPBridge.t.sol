@@ -33,10 +33,11 @@ contract CCIPBridgeTest is Test {
     error WrongSender();
     error WrongSourceAddress();
     error InvalidChain();
+    error NoErrorFound();
 
     address[] zeros;
     uint256[] mintAmounts;
-    uint256 mintAmount = 80000 ether;
+    uint256 mintAmount = 1000 ether;
 
     uint64 ccipOpId = 3734403246176062136;
     uint256 opId = 10;
@@ -197,6 +198,53 @@ contract CCIPBridgeTest is Test {
         assertEq(lockboxBal, 0);
         assertEq(userBal, 10 ether);
         assertEq(xbifiBal, 0);
+
+        vm.stopPrank();
+    }
+
+    function test_retryBridge() public {
+         vm.startPrank(address(router));
+
+        deal(address(bifi), lockbox, 2000 ether);
+
+        bytes memory data = abi.encode(user, 1000 ether);
+
+        IRouterClient.Any2EVMMessage memory message = IRouterClient.Any2EVMMessage(
+            keccak256(abi.encode("MintTest")),
+            ccipOpId,
+            abi.encode(address(bridge)),
+            data,
+            new IRouterClient.EVMTokenAmount[](0)
+        );
+
+        bridge.ccipReceive(message);
+
+        uint256 amt = IERC20(address(bifi)).balanceOf(user);
+        assertEq(amt, 1000 ether);
+
+        data = abi.encode(user, 10 ether);
+
+        message = IRouterClient.Any2EVMMessage(
+            keccak256(abi.encode("MintTest")),
+            ccipOpId,
+            abi.encode(address(bridge)),
+            data,
+            new IRouterClient.EVMTokenAmount[](0)
+        );
+
+        bridge.ccipReceive(message);
+
+        amt = IERC20(address(bifi)).balanceOf(user);    
+        assertEq(amt, 1000 ether);
+
+        skip(1 days);
+        bridge.retry(0);
+
+        amt = IERC20(address(bifi)).balanceOf(user);
+        assertEq(amt, 1010 ether);
+
+        vm.expectRevert(NoErrorFound.selector);
+        bridge.retry(0);
 
         vm.stopPrank();
     }

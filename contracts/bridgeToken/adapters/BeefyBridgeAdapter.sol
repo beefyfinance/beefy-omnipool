@@ -16,10 +16,23 @@ contract BeefyBridgeAdapter is OwnableUpgradeable {
     IERC20 public BIFI;
     IXERC20 public xBIFI;
     IXERC20Lockbox public lockbox;
+    uint256 private nonce;
+
+    struct Error {
+        uint256 chainId;
+        address user; 
+        uint256 amount;
+    }
+
+    // Map Error events for retry. 
+    mapping (uint256 => Error) public errors;
 
     // Events
     event BridgedOut(uint256 indexed dstChainId, address indexed bridgeUser, address indexed tokenReceiver, uint256 amount);
     event BridgedIn(uint256 indexed srcChainId, address indexed tokenReceiver, uint256 amount);
+    event BridgeError(uint256 indexed errorId, address indexed user, uint256 amount, uint256 timestamp);
+
+    error NoErrorFound();
 
     /**@notice Initialize the bridge
      * @param _bifi BIFI token address
@@ -39,22 +52,8 @@ contract BeefyBridgeAdapter is OwnableUpgradeable {
 
         if (address(lockbox) != address(0)) {
             BIFI.safeApprove(address(lockbox), type(uint).max);
+            IERC20(address(xBIFI)).safeApprove(address(lockbox), type(uint).max);
         }
-    }
-
-     /**@notice  Bridge out funds with permit
-     * @param _user User address
-     * @param _dstChainId Destination chain id 
-     * @param _amount Amount of BIFI to bridge out
-     * @param _to Address to receive funds on destination chain
-     * @param _deadline Deadline for permit
-     * @param v v value for permit
-     * @param r r value for permit
-     * @param s s value for permit
-     */
-    function bridge(address _user, uint256 _dstChainId, uint256 _amount, address _to, uint256 _deadline, uint8 v, bytes32 r, bytes32 s) external virtual payable {
-        IERC20Permit(address(BIFI)).permit(_user, address(this), _amount, _deadline, v, r, s);
-        _bridge(_user, _dstChainId, _amount, _to);
     }
 
     /**@notice Bridge Out Funds
@@ -82,12 +81,28 @@ contract BeefyBridgeAdapter is OwnableUpgradeable {
         } else xBIFI.burn(_user, _amount);
     }
 
-    function _bridgeIn(address _user, uint256 _amount) internal virtual {
-        xBIFI.mint(address(this), _amount);
-        if (address(lockbox) != address(0)) {
-            lockbox.withdraw(_amount);
-            BIFI.transfer(_user, _amount);
-        } else IERC20(address(xBIFI)).transfer(_user, _amount); 
+    function _bridgeIn(uint256 _chainId, address _user, uint256 _amount) internal virtual {
+        try xBIFI.mint(address(this), _amount) {
+            if (address(lockbox) != address(0)) {
+                lockbox.withdraw(_amount);
+                BIFI.safeTransfer(_user, _amount);
+            } else IERC20(address(xBIFI)).safeTransfer(_user, _amount); 
+            emit BridgedIn(_chainId, _user, _amount);  
+        } catch {
+            uint256 _nonce = nonce;
+            errors[_nonce] = Error(_chainId, _user, _amount);
+            nonce++;
+            emit BridgeError(_nonce, _user, _amount, block.timestamp);
+        }
+    }
+
+    function retry(uint256 _errorId) external {
+        Error memory _error = errors[_errorId];
+        delete errors[_errorId];
+
+        if (_error.user == address(0)) revert NoErrorFound();
+
+        _bridgeIn(_error.chainId, _error.user, _error.amount);
     }
 
     /**@notice Estimate bridge cost
@@ -99,5 +114,4 @@ contract BeefyBridgeAdapter is OwnableUpgradeable {
         _dstChainId; _amount; _to;
         return 0;
     }
-
 }

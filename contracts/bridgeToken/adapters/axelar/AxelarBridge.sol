@@ -21,7 +21,6 @@ contract AxelarBridge is BeefyBridgeAdapter {
     IAxelarGateway public gateway;
     IAxelarGasService public gasService;
 
-
     // Chain id to axelar id mapping.
     mapping (uint256 => string) public chainIdToAxelarId;
     mapping (string => uint256) public axelarIdToChainId;
@@ -51,6 +50,7 @@ contract AxelarBridge is BeefyBridgeAdapter {
 
         if (address(lockbox) != address(0)) {
             BIFI.safeApprove(address(lockbox), type(uint).max);
+            IERC20(address(xBIFI)).safeApprove(address(lockbox), type(uint).max);
         }
     }
 
@@ -104,8 +104,6 @@ contract AxelarBridge is BeefyBridgeAdapter {
        
         (address user, uint256 amount) = abi.decode(payload, (address,uint256));
 
-        _bridgeIn(user, amount);
-
-        emit BridgedIn(axelarIdToChainId[sourceChain], user, amount);      
+        _bridgeIn(axelarIdToChainId[sourceChain], user, amount);    
     }
 }

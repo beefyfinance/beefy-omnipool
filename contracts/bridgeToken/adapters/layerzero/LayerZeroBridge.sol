@@ -40,6 +40,7 @@ contract LayerZeroBridge is NonblockingLzApp, BeefyBridgeAdapter {
 
         if (address(lockbox) != address(0)) {
             BIFI.safeApprove(address(lockbox), type(uint).max);
+            IERC20(address(xBIFI)).safeApprove(address(lockbox), type(uint).max);
         }
     }
 
@@ -99,9 +100,7 @@ contract LayerZeroBridge is NonblockingLzApp, BeefyBridgeAdapter {
     ) internal override {
         (address user, uint256 amount) = abi.decode(_payload, (address,uint256));
         
-        _bridgeIn(user, amount);
-
-        emit BridgedIn(lzIdToChainId[_srcChainId], user, amount);      
+        _bridgeIn(lzIdToChainId[_srcChainId], user, amount);   
     }
 
     /**@notice Set gas limit for destination chain execution

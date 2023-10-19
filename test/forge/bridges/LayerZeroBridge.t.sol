@@ -28,19 +28,16 @@ contract LayerZeroBridgeTest is Test {
 
     address[] zeros;
     uint256[] mintAmounts;
-    uint256 mintAmount = 80000 ether;
+    uint256 mintAmount = 1000 ether;
 
     uint16 lzOpId = 111;
     uint256 opId = 10;
     uint256[] chainIds;
     uint16[] lzIds;
 
-    uint256 signerPk;
+    error NoErrorFound();
 
      function setUp() public {
-
-        // Just a test PK no live funds on this address
-        signerPk = 0x951388a043b3665bed42537db0ae3745b36023af86a8f1cd185d269fb44667f7;
         mintAmounts.push(mintAmount);
         zeros.push(zero);
         bifi = new BIFI();
@@ -86,49 +83,6 @@ contract LayerZeroBridgeTest is Test {
         uint256 gasNeeded = bridge.bridgeCost(dstChainId, 10 ether, user);
 
         bridge.bridge{value: gasNeeded}(dstChainId, 10 ether, user);
-
-        uint256 lockboxBal = IERC20(address(bifi)).balanceOf(address(lockbox));
-        uint256 userBal = IERC20(address(bifi)).balanceOf(user);
-        uint256 xbifiBal = IERC20(address(xbifi)).totalSupply();
-
-        assertEq(lockboxBal, 10 ether);
-        assertEq(userBal, 0);
-        assertEq(xbifiBal, 0);
-
-        vm.stopPrank();
-    }
-
-     function test_bridge_out_with_permit() public {
-       // Wallet memory wallet = vm.createWallet();
-        vm.startPrank(user);
-        deal(address(bifi), user, 10 ether);
-
-        uint256 dstChainId = 10;
-        uint16 lzId = bridge.chainIdToLzId(dstChainId);
-
-        assertEq(lzId, lzOpId);
-
-        uint256 gasNeeded = bridge.bridgeCost(dstChainId, 10 ether, user);
-
-        bytes32 typehash = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-        uint256 nonce = IERC20Permit(address(bifi)).nonces(user);
-
-        bytes32 DOMAIN_SEPARATOR = IERC20Permit(address(bifi)).DOMAIN_SEPARATOR();
-        bytes32 digest = keccak256(abi.encode(
-                        typehash,
-                        user,
-                        address(bridge),
-                        uint256(10 ether),
-                        nonce,
-                        uint256(block.timestamp + 1000)));
-
-        bytes32 withDomain = ECDSA.toTypedDataHash(DOMAIN_SEPARATOR, digest);
-
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, withDomain);
-
-        uint256 deadline = block.timestamp + 1000;
-
-        bridge.bridge{value: gasNeeded}(user, dstChainId, 10 ether, user, deadline, v, r, s);
 
         uint256 lockboxBal = IERC20(address(bifi)).balanceOf(address(lockbox));
         uint256 userBal = IERC20(address(bifi)).balanceOf(user);
@@ -195,6 +149,42 @@ contract LayerZeroBridgeTest is Test {
         assertEq(lockboxBal, 0);
         assertEq(userBal, 10 ether);
         assertEq(xbifiBal, 0);
+
+        vm.stopPrank();
+    }
+
+     function test_retryBridge() public {
+        vm.startPrank(address(endpoint));
+
+        deal(address(bifi), lockbox, 2000 ether);
+
+        bytes memory payload = abi.encode(user, 1000 ether);
+        bytes memory trustedRemote = abi.encodePacked(abi.encodePacked(address(bridge)), address(bridge));
+
+        uint256 approvalAmount = IERC20(address(xbifi)).allowance(address(bridge), address(lockbox));
+        assertEq(approvalAmount, type(uint256).max);
+
+        // User should get their first 1000 tokens.
+        bridge.lzReceive(lzOpId, trustedRemote, 0, payload);
+
+        uint256 amt = IERC20(address(bifi)).balanceOf(user);
+
+        assertEq(amt, 1000 ether);
+
+        payload = abi.encode(user, 10 ether);
+        bridge.lzReceive(lzOpId, trustedRemote, 0, payload);
+
+        amt = IERC20(address(bifi)).balanceOf(user);    
+        assertEq(amt, 1000 ether);
+
+        skip(1 days);
+        bridge.retry(0);
+
+        amt = IERC20(address(bifi)).balanceOf(user);
+        assertEq(amt, 1010 ether);
+
+        vm.expectRevert(NoErrorFound.selector);
+        bridge.retry(0);
 
         vm.stopPrank();
     }

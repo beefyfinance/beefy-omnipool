@@ -56,6 +56,7 @@ contract OptimismBridgeAdapter is BeefyBridgeAdapter {
 
         if (address(lockbox) != address(0)) {
             BIFI.safeApprove(address(lockbox), type(uint).max);
+            IERC20(address(xBIFI)).safeApprove(address(lockbox), type(uint).max);
         }
     }
 
@@ -83,8 +84,6 @@ contract OptimismBridgeAdapter is BeefyBridgeAdapter {
         uint256 _amount
     ) external onlyBridge {
 
-        _bridgeIn(_user, _amount);
-
-        emit BridgedIn(dstChainId, _user, _amount);      
+        _bridgeIn(dstChainId, _user, _amount);    
     }
 }

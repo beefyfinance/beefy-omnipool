@@ -40,12 +40,14 @@ contract AxelarBridgeTest is Test {
 
     address[] zeros;
     uint256[] mintAmounts;
-    uint256 mintAmount = 80000 ether;
+    uint256 mintAmount = 1000 ether;
 
     string axelarOpId = "optimism";
     uint256 opId = 10;
     uint256[] chainIds;
     string[] axelarIds;
+
+    error NoErrorFound();
 
     function setUp() public {
         mintAmounts.push(mintAmount);
@@ -158,6 +160,73 @@ contract AxelarBridgeTest is Test {
         assertEq(lockboxBal, 0);
         assertEq(userBal, 10 ether);
         assertEq(xbifiBal, 0);
+
+        vm.stopPrank();
+    }
+
+    function test_retryBridge() public {
+         vm.startPrank(address(gateway));
+
+        deal(address(bifi), lockbox, 2000 ether);
+
+        bytes32 commandId = keccak256(abi.encode("Success!"));
+        string memory srcAddress = address(bridge).toString();
+        bytes memory payload = abi.encode(user, 1000 ether);
+
+        // Source address is not the gateway
+
+        // Build the verify key.
+        bytes32 payloadHash = keccak256(payload);
+        bytes32 key = keccak256(abi.encode(PREFIX_CONTRACT_CALL_APPROVED, commandId, axelarOpId, srcAddress, address(bridge), payloadHash));
+
+        // The mapping slot on the gateway contract.
+        bytes32 mappingSlot = 0x0000000000000000000000000000000000000000000000000000000000000004;
+
+        // The slot where our key is stored from the mapping.
+        bytes32 slot = keccak256(abi.encode(key, mappingSlot));
+
+        // The value of to our key (true);
+        bytes32 value = bytes32(abi.encode(true));
+
+        // Store it. 
+        vm.store(address(gateway), slot, value);
+
+        bridge.execute(commandId, axelarOpId, srcAddress, payload);
+
+        uint256 amt = IERC20(address(bifi)).balanceOf(user);
+        assertEq(amt, 1000 ether);
+
+        payload = abi.encode(user, 10 ether);
+        
+        // Build the verify key.
+        payloadHash = keccak256(payload);
+        key = keccak256(abi.encode(PREFIX_CONTRACT_CALL_APPROVED, commandId, axelarOpId, srcAddress, address(bridge), payloadHash));
+
+        // The mapping slot on the gateway contract.
+        mappingSlot = 0x0000000000000000000000000000000000000000000000000000000000000004;
+
+        // The slot where our key is stored from the mapping.
+        slot = keccak256(abi.encode(key, mappingSlot));
+
+        // The value of to our key (true);
+        value = bytes32(abi.encode(true));
+
+        // Store it. 
+        vm.store(address(gateway), slot, value);
+
+        bridge.execute(commandId, axelarOpId, srcAddress, payload);
+
+        amt = IERC20(address(bifi)).balanceOf(user);    
+        assertEq(amt, 1000 ether);
+
+        skip(1 days);
+        bridge.retry(0);
+
+        amt = IERC20(address(bifi)).balanceOf(user);
+        assertEq(amt, 1010 ether);
+
+        vm.expectRevert(NoErrorFound.selector);
+        bridge.retry(0);
 
         vm.stopPrank();
     }
