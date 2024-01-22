@@ -140,7 +140,22 @@ module.exports = {
       url: "https://mainnet.base.org",
       chainId: 8453,
       accounts
-    }
+    },
+    rollux : {
+      url: "https://rpc.rollux.com",
+      chainId: 570,
+      accounts
+    },
+    linea : {
+      url: "https://rpc.linea.build",
+      chainId: 59144,
+      accounts
+    },
+    mantle: {
+      url: "https://rpc.mantle.xyz",
+      chainId: 5000,
+      accounts
+    },
   },
   solidity: {
     compilers: [
@@ -175,7 +190,8 @@ module.exports = {
       metis: 'abc',
       cronos: 'Z7WAPMHSYYJUF17SARKRR7C3KVKP1RBKT2',
       zkevm: 'XA9JHURP96CFKXCUVJ6I5RV24PM9RU8ZA8',
-      base: 'NG5B3BF74C1BDAVVIJAWQS46YQV9B54TC5'
+      base: 'NG5B3BF74C1BDAVVIJAWQS46YQV9B54TC5',
+      mantle: 'abc'
     },
     customChains: [
       {
@@ -256,6 +272,14 @@ module.exports = {
         urls: {
           apiURL: "https://api.basescan.org/api",
           browserURL: "https://basescan.org/",
+        },
+      },
+      {
+        network: "mantle",
+        chainId: 5000,
+        urls: {
+          apiURL: "https://api.routescan.io/v2/network/mainnet/evm/5000/etherscan",
+          browserURL: "https://mantlescan.info",
         },
       },
     ]
