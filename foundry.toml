@@ -33,3 +33,6 @@ constantOptimizer = true
 yul = true # makes it worse
 # orderLiterals = true # makes it worse
 # cse = true # makes it worse
+
+[rpc_endpoints]
+arbitrum = "${ARBITRUM_RPC}"
