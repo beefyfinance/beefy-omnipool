@@ -16,7 +16,7 @@
     "deploy:bridge": "npx hardhat run scripts/deployBridge.js --network",
     "deploy:proxy": "npx hardhat run scripts/deployProxyBridge.js --network",
     "deploy:tokenBridge": "npx hardhat run scripts/deployTokenBridge.js --network",
-    "deploy:zap": "npx hardhat run scripts/deployZap.js --network",
+    "deploy:stargateZapReceiver": "npx hardhat run scripts/deployStargateZapReceiver.js --network",
     "test:arbitrum": "forge test --match-path test/forge/chains/TestArbitrum.t.sol --fork-url https://rpc.ankr.com/arbitrum -vvvv",
     "test:base": "forge test --match-path test/forge/chains/TestBase.t.sol --fork-url https://developer-access-mainnet.base.org -vvv",
     "test:bnb": "forge test --match-path test/forge/chains/TestBnb.t.sol --fork-url https://binance.nodereal.io -vvv",
@@ -33,7 +33,7 @@
     "test:layerzero:bridge": "forge test --match-path test/forge/bridges/LayerZeroBridge.t.sol --fork-url https://rpc.ankr.com/eth -vvv",
     "test:ccip:bridge": "forge test --match-path test/forge/bridges/CCIPBridge.t.sol --fork-url https://rpc.ankr.com/eth -vvv",
     "test:axelar:bridge": "forge test --match-path test/forge/bridges/AxelarBridge.t.sol --fork-url https://rpc.ankr.com/eth -vvv",
-    "test:arbitrum:zap": "forge test --match-path test/forge/zap/BeefyStargateZap.t.sol --fork-url https://arbitrum.llamarpc.com -vvv",
+    "test:arbitrum:stargateZapReceiver": "forge test --match-path test/forge/zap/BeefyStargateZapReceiver.t.sol --fork-url arbitrum -vvv",
     "verify": "npx hardhat verify"
   },
   "devDependencies": {
