@@ -12,8 +12,8 @@ const bridgeAbi = require("../artifacts/contracts/bridge/BeefyRevenueBridge.sol/
 async function main() {
     const bridge = "0x02Ae4716B9D5d48Db1445814b0eDE39f5c28264B"
     const cowllector = "0x03d9964f4D93a24B58c0Fc3a8Df3474b59Ba8557";
-    const minAmount = .03;
-    const minBridgeAmount = 1000;
+    const minAmount = .1;
+    const minBridgeAmount = 4000;
     
 
     // minAmount to wei 
@@ -41,11 +41,10 @@ async function main() {
     let tx = await contract.setCowllector(cowTuple);
     await tx.wait();
     console.log("Cowllector set to:", cowllector);
-/*
+
     tx = await contract.setMinBridgeAmount(BigInt(minbrgamount))
     await tx.wait();
     console.log("MinBridgeAmount set to:", minBridgeAmount);
-*/
     
 }
 

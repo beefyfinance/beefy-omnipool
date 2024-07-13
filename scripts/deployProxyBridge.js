@@ -10,10 +10,10 @@ const bridgeAbi = require("../artifacts/contracts/bridge/BeefyRevenueBridge.sol/
 const deployerAbi = require("../artifacts/contracts/bridge/BeefyProxyDeployer.sol/BeefyProxyDeployer.json");
 const {
   tokens: {
-   ETH: { address: native },
-    USDC: { address: stable },
+    frxETH: { address: native },
+    FRAX: { address: stable },
   },
-} = addressBook.zkevm;
+} = addressBook.fraxtal;
 
 const axelarParams = {
     chain: "Polygon",
@@ -42,24 +42,24 @@ const beefyBridgeImplementationSalt = "0x5c54e6d234a3c2222b59cf833671c9612a89518
 const beefyProxyDeployerSalt = "0xe647ddf8d26f2415d3f90af679de723aff5732947b8e818f4026e9058419a0c8";
 const beefyBridgeProxySalt = "0xf8c6154b5e6d912f4d46dc26b1f505505221c75612b89027a7ac012752fd4abf";
 
-const path = ethers.utils.solidityPack(["address", "uint24", "address"], [native, 500, stable]);
+const path = ethers.utils.solidityPack(["address", "uint24", "address"], [native, 250, stable]);
 const route = [native, stable];
 const solidlyRoute = [[native, stable, false]];
-const bridgeAddress = "0x8671A0465844a15eb7230C5dd8d6032c26c655B7";
-const router = "0xF6Ad3CcF71Abb3E12beCf6b3D2a74C963859ADCd";
+const bridgeAddress = "0x00160baF84b3D2014837cc12e838ea399f8b8478";
+const router = "0xAAAE99091Fbb28D400029052821653C1C752483B";
 
 
-const bridge = "SYNAPSE";
-const swap = "ALGEBRA";
+const bridge = "FRAXFERRY";
+const swap = "UNISWAP_V3_DEADLINE";
 
 const deploy = false;
 const deployProxyDeployer = false;
 const deployImpl = false;
 
 const addBridge = true;
-const addSwap = false;
+const addSwap = true;
 
-let destinationAddress = "0xc9C61194682a3A5f56BF9Cd5B59EE63028aB6041";
+let destinationAddress = "0x340014C66D49f50c48E6eF0D02aB630F246F1921";
 if (bridge == "STARGATE") destinationAddress = "0x5f98f630009E0E090965fb42DDe95F5A2d495445";
 else if (bridge == "AXELAR") destinationAddress = "0xc0D173E3486F7C3d57E8a38a003500Fd27E7d055";
 
@@ -146,6 +146,20 @@ async function main() {
         if (bridge == "zkEVM") {
             let hash = await contract.findHash(bridge);
             tx = await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["address[]"], [route])]);
+            await tx.wait();
+            console.log(`Set bridge to ${bridge}`);
+        }
+
+        if (bridge == "LINEA") {
+            let hash = await contract.findHash(bridge);
+            tx = await contract.setActiveBridge(hash, [bridgeAddress, "0x"]);
+            await tx.wait();
+            console.log(`Set bridge to ${bridge}`);
+        }
+
+        if (bridge == "FRAXFERRY") {
+            let hash = await contract.findHash(bridge);
+            tx = await contract.setActiveBridge(hash, [bridgeAddress, "0x"]);
             await tx.wait();
             console.log(`Set bridge to ${bridge}`);
         }

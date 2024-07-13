@@ -156,6 +156,16 @@ module.exports = {
       chainId: 5000,
       accounts
     },
+    mode: {
+      url: "https://mode.drpc.org",
+      chainId: 34443,
+      accounts
+    },
+    fraxtal: {
+      url: "https://rpc.frax.com",
+      chainId: 252,
+      accounts
+    },
   },
   solidity: {
     compilers: [
@@ -191,7 +201,10 @@ module.exports = {
       cronos: 'Z7WAPMHSYYJUF17SARKRR7C3KVKP1RBKT2',
       zkevm: 'XA9JHURP96CFKXCUVJ6I5RV24PM9RU8ZA8',
       base: 'NG5B3BF74C1BDAVVIJAWQS46YQV9B54TC5',
-      mantle: 'abc'
+      mantle: 'abc',
+      linea: 'BVQHS18UV5PYURM2Z9SZNEH7M2XX6H1EDY',
+      mode: 'abc',
+      fraxtal: 'F3H6Z6HJEPD2P298ZVGK31N7QSKEXRHIC3'
     },
     customChains: [
       {
@@ -280,6 +293,30 @@ module.exports = {
         urls: {
           apiURL: "https://api.routescan.io/v2/network/mainnet/evm/5000/etherscan",
           browserURL: "https://mantlescan.info",
+        },
+      },
+      {
+        network: "linea",
+        chainId: 59144,
+        urls: {
+          apiURL: "https://api.lineascan.build/api",
+          browserURL: "https://lineascan.build/",
+        },
+      },
+      {
+        network: "mode",
+        chainId: 34443,
+        urls: {
+          apiURL: "https://explorer.mode.network/api",
+          browserURL: "https://explorer.mode.network/",
+        },
+      },
+      {
+        network: "fraxtal",
+        chainId: 252,
+        urls: {
+          apiURL: "https://api.fraxscan.com/api",
+          browserURL: "https://fraxscan.com",
         },
       },
     ]
