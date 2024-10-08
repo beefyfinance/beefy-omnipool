@@ -50,4 +50,13 @@ contract Structs {
         uint8 dstIndexFrom;
         uint8 dstIndexTo;
     }
+
+    struct Across {
+        uint256 destinationChainId;
+        uint256 relayFee;
+    }
+
+    struct ReAl {
+        uint16 dstChainId;
+    }
 }

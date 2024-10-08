@@ -166,6 +166,11 @@ module.exports = {
       chainId: 252,
       accounts
     },
+    real: {
+      url: process.env.REAL_RPC || "https://real.drpc.org",
+      chainId: 111188,
+      accounts,
+    }
   },
   solidity: {
     compilers: [
@@ -204,7 +209,8 @@ module.exports = {
       mantle: 'abc',
       linea: 'BVQHS18UV5PYURM2Z9SZNEH7M2XX6H1EDY',
       mode: 'abc',
-      fraxtal: 'F3H6Z6HJEPD2P298ZVGK31N7QSKEXRHIC3'
+      fraxtal: 'F3H6Z6HJEPD2P298ZVGK31N7QSKEXRHIC3',
+      real: 'abc'
     },
     customChains: [
       {
@@ -319,6 +325,14 @@ module.exports = {
           browserURL: "https://fraxscan.com",
         },
       },
+      {
+        network: "real",
+        chainId: 111188,
+        urls: {
+          apiURL: "https://explorer.re.al/api",
+          browserURL: "https://explorer.re.al",
+        },
+      }
     ]
   }
 };

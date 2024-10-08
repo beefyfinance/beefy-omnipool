@@ -10,10 +10,10 @@ const bridgeAbi = require("../artifacts/contracts/bridge/BeefyRevenueBridge.sol/
 const deployerAbi = require("../artifacts/contracts/bridge/BeefyProxyDeployer.sol/BeefyProxyDeployer.json");
 const {
   tokens: {
-    frxETH: { address: native },
-    FRAX: { address: stable },
+    WREETH: { address: native },
+    USDC: { address: stable },
   },
-} = addressBook.fraxtal;
+} = addressBook.real;
 
 const axelarParams = {
     chain: "Polygon",
@@ -36,20 +36,29 @@ const synapseParams = {
     dstIndexTo: 2
 }
 
+const acrossParams = {
+    chainId: 42161,
+    relayFee: 100000,
+}
+
+const realParams ={
+    chainId: 110
+}
+
 const beefyContractDeployer = "0xcc536552A6214d6667fBC3EC38965F7f556A6391";
 const beefyContractDeployerAbi = ["function deploy(bytes32 _salt, bytes memory _bytecode) external returns (address)"];
 const beefyBridgeImplementationSalt = "0x5c54e6d234a3c2222b59cf833671c9612a89518065a4ecf12ac6bbcb69bcf454";
 const beefyProxyDeployerSalt = "0xe647ddf8d26f2415d3f90af679de723aff5732947b8e818f4026e9058419a0c8";
 const beefyBridgeProxySalt = "0xf8c6154b5e6d912f4d46dc26b1f505505221c75612b89027a7ac012752fd4abf";
 
-const path = ethers.utils.solidityPack(["address", "uint24", "address"], [native, 250, stable]);
+const path = ethers.utils.solidityPack(["address", "uint24", "address"], [native, 3000, stable]);
 const route = [native, stable];
 const solidlyRoute = [[native, stable, false]];
-const bridgeAddress = "0x00160baF84b3D2014837cc12e838ea399f8b8478";
-const router = "0xAAAE99091Fbb28D400029052821653C1C752483B";
+const bridgeAddress = "0x7dfe5d23761B7a748e962003e0FC6b4559afED39";
+const router = "0xa1F56f72b0320179b01A947A5F78678E8F96F8EC";
 
 
-const bridge = "FRAXFERRY";
+const bridge = "REAL";
 const swap = "UNISWAP_V3_DEADLINE";
 
 const deploy = false;
@@ -59,7 +68,7 @@ const deployImpl = false;
 const addBridge = true;
 const addSwap = true;
 
-let destinationAddress = "0x340014C66D49f50c48E6eF0D02aB630F246F1921";
+let destinationAddress = "0x02Ae4716B9D5d48Db1445814b0eDE39f5c28264B";
 if (bridge == "STARGATE") destinationAddress = "0x5f98f630009E0E090965fb42DDe95F5A2d495445";
 else if (bridge == "AXELAR") destinationAddress = "0xc0D173E3486F7C3d57E8a38a003500Fd27E7d055";
 
@@ -160,6 +169,20 @@ async function main() {
         if (bridge == "FRAXFERRY") {
             let hash = await contract.findHash(bridge);
             tx = await contract.setActiveBridge(hash, [bridgeAddress, "0x"]);
+            await tx.wait();
+            console.log(`Set bridge to ${bridge}`);
+        }
+
+        if (bridge == "ACROSS") {
+            let hash = await contract.findHash(bridge);
+            tx = await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["uint256","uint256"], [acrossParams.chainId, acrossParams.relayFee])]);
+            await tx.wait();
+            console.log(`Set bridge to ${bridge}`);
+        }
+
+        if (bridge == "REAL") {
+            let hash = await contract.findHash(bridge);
+            tx = await contract.setActiveBridge(hash, [bridgeAddress, abiCoder.encode(["uint256"], [realParams.chainId])]);
             await tx.wait();
             console.log(`Set bridge to ${bridge}`);
         }
