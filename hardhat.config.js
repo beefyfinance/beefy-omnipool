@@ -187,30 +187,7 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      canto: "abc",
-      kava: "abc",
-      fuse: "abc",
-      base_goerli: "abc",
-      mainnet: process.env.MAINNET_API_KEY,
-      moonbeam: process.env.MOONBEAM_API_KEY,
-      moonriver: process.env.MOONRIVER_API_KEY,
-      optimisticEthereum: process.env.OPTIMISM_API_KEY,
-      arbitrumOne: process.env.ARBITRUM_API_KEY,
-      bsc: process.env.BSC_API_KEY,
-      polygon: process.env.POLYGON_API_KEY,
-      opera: process.env.FANTOM_API_KEY,
-      avalanche: process.env.AVAX_API_KEY,
-      aurora: process.env.AURORA_API_KEY,
-      celo: process.env.CELO_API_KEY,
-      metis: 'abc',
-      cronos: 'Z7WAPMHSYYJUF17SARKRR7C3KVKP1RBKT2',
-      zkevm: 'XA9JHURP96CFKXCUVJ6I5RV24PM9RU8ZA8',
-      base: 'NG5B3BF74C1BDAVVIJAWQS46YQV9B54TC5',
-      mantle: 'abc',
-      linea: 'BVQHS18UV5PYURM2Z9SZNEH7M2XX6H1EDY',
-      mode: 'abc',
-      fraxtal: 'F3H6Z6HJEPD2P298ZVGK31N7QSKEXRHIC3',
-      real: 'abc'
+      
     },
     customChains: [
       {
