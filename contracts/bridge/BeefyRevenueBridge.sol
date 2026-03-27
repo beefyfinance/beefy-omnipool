@@ -57,6 +57,8 @@ contract BeefyRevenueBridge is
     // Mapping our enums to function string
     mapping(bytes32 => string) public bridgeToUse;
     mapping(bytes32 => string) public swapToUse;
+
+    uint256 public lastHarvest;
    
     function initialize() external initializer {
         __Ownable_init();
@@ -100,7 +102,10 @@ contract BeefyRevenueBridge is
         _wrapNative();
         _sendCowllectorFunds();
 
-        if (_balanceOfNative() > 0) _bridge();
+        if (_balanceOfNative() > 0) {
+            _bridge();
+            lastHarvest = block.timestamp;
+        }
     }
 
     function _swap() private {
