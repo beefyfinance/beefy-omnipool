@@ -19,6 +19,9 @@ remappings = [
     "lib/forge-std:ds-test/=lib/forge-std/lib/ds-test/src/",
 ]
 deny_warnings = true
+optimizer = true
+optimizer_runs = 200
+via_ir = true
 
 
 [profile.gas-optimize]
