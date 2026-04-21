@@ -39,7 +39,7 @@ contract TestLinea is Test, Structs {
         bridge.upgradeTo(address(newImplementation));
 
         console.logBytes32(active);
-        bridge.setBridgeMap(active, "bridgeLinea()");
+        // bridge.setBridgeMap(active, "bridgeLinea()"); // function removed in current BeefyRevenueBridge
       
         vm.stopPrank();
     }
