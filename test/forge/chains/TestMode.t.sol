@@ -40,7 +40,7 @@ contract TestMode is Test, Structs {
         bridge.setStable(stable, native);
 
         console.logBytes32(active);
-        bridge.setBridgeMap(active, "bridgeAcross()");
+        // bridge.setBridgeMap(active, "bridgeAcross()"); // function removed in current BeefyRevenueBridge
       
         vm.stopPrank();
     }

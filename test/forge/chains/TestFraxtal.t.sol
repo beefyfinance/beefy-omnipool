@@ -39,7 +39,7 @@ contract TestFraxtal is Test, Structs {
         bridge.upgradeTo(address(newImplementation));
 
         console.logBytes32(active);
-        bridge.setBridgeMap(active, "bridgeFraxFerry()");
+        // bridge.setBridgeMap(active, "bridgeFraxFerry()"); // function removed in current BeefyRevenueBridge
       
         vm.stopPrank();
     }
