@@ -46,7 +46,7 @@ contract TestZkSync is Test, Structs {
         
         vm.startPrank(user);
         deal(address(native), address(bridge), 10 ether);
-        console.log(10);
+        console.log(uint256(10));
         bridge.harvest();
         vm.stopPrank();
     }
