@@ -3,13 +3,17 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/ERC20.sol";
-import {LayerZeroBridge} from "../../../contracts/bridgeToken/adapters/layerzero/LayerZeroBridgeV2.sol";
+import {LayerZeroBridgeV2} from "../../../contracts/bridgeToken/adapters/layerzero/LayerZeroBridgeV2.sol";
 import {BIFI} from "../../../contracts/bridgeToken/BIFI.sol";
 import {XERC20Factory} from "../../../contracts/bridgeToken/XERC20Factory.sol";
 import {IXERC20} from "../../../contracts/bridgeToken/interfaces/IXERC20.sol";
 import {IXERC20Lockbox} from "../../../contracts/bridgeToken/interfaces/IXERC20Lockbox.sol";
 import {Origin} from "@layerzerolabs/oapp-evm-upgradeable/contracts/oapp/OAppUpgradeable.sol";
-import {MessagingParams, MessagingFee, MessagingReceipt} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {
+    MessagingParams,
+    MessagingFee,
+    MessagingReceipt
+} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
 // Minimal stand-in for EndpointV2 – accepts ETH fees
 contract MockEndpointV2 {
@@ -33,7 +37,7 @@ contract LayerZeroBridgeV2Test is Test {
     address xbifi;
     address lockbox;
     XERC20Factory factory;
-    LayerZeroBridge bridge;
+    LayerZeroBridgeV2 bridge;
     MockEndpointV2 mockEndpoint;
 
     address[] zeros;
@@ -58,7 +62,7 @@ contract LayerZeroBridgeV2Test is Test {
         xbifi = factory.deployXERC20("Beefy", "BIFI", mintAmounts, mintAmounts, zeros);
         lockbox = factory.deployLockbox(xbifi, address(bifi), false);
 
-        bridge = new LayerZeroBridge(address(mockEndpoint));
+        bridge = new LayerZeroBridgeV2(address(mockEndpoint));
         bridge.initialize(IERC20(address(bifi)), IXERC20(xbifi), IXERC20Lockbox(lockbox), address(this));
 
         IXERC20(xbifi).setLimits(address(bridge), mintAmount, mintAmount);
@@ -67,8 +71,8 @@ contract LayerZeroBridgeV2Test is Test {
         eids.push(opEid);
         bridge.addChainIds(chainIds, eids);
         bridge.setPeer(opEid, bytes32(uint256(uint160(address(bridge)))));
-        // Minimal ExecutorLzReceiveOption: type(3) + worker(1) + length(16) + gas(200000) + value(0)
-        bridge.setOptions(hex"0003010011010000000000000000000000000030d400");
+        // Type 3, worker 1, option size 17, receive option 1, uint128 gas (200,000), no native value.
+        bridge.setOptions(hex"00030100110100000000000000000000000000030d40");
     }
 
     function test_bridge_out() public {
@@ -94,6 +98,7 @@ contract LayerZeroBridgeV2Test is Test {
         deal(address(bifi), user, 10 ether);
         IERC20(address(bifi)).approve(address(bridge), type(uint256).max);
 
+        vm.deal(user, 1 ether);
         uint256 unknownChainId = 42161; // no peer set → NoPeer revert from OAppCore
         vm.expectRevert();
         bridge.bridge{value: 0.01 ether}(unknownChainId, 10 ether, user);

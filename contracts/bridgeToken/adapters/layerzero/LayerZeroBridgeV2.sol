@@ -9,7 +9,7 @@ import {IXERC20Lockbox} from "../../interfaces/IXERC20Lockbox.sol";
 import {OAppUpgradeable, Origin, MessagingFee} from "@layerzerolabs/oapp-evm-upgradeable/contracts/oapp/OAppUpgradeable.sol";
 
 // Lazyer Zero Token Bridge adapter for XERC20 tokens
-contract LayerZeroBridge is OAppUpgradeable, BeefyBridgeAdapter {
+contract LayerZeroBridgeV2 is OAppUpgradeable, BeefyBridgeAdapter {
     using SafeERC20 for IERC20;
 
     // LZ V2 encoded options for lzReceive execution gas
